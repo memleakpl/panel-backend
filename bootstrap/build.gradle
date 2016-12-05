@@ -1,0 +1,53 @@
+buildscript {
+	ext {
+		springBootVersion = '2.0.0.BUILD-SNAPSHOT'
+	}
+	repositories {
+		mavenCentral()
+		maven { url "https://repo.spring.io/snapshot" }
+		maven { url "https://repo.spring.io/milestone" }
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'war'
+
+
+jar {
+	baseName = 'panel'
+	version = '0.0.1-SNAPSHOT'
+}
+
+war {
+	baseName = 'panel'
+	version = '0.0.1-SNAPSHOT'
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+	maven { url "https://repo.spring.io/snapshot" }
+	maven { url "https://repo.spring.io/milestone" }
+}
+
+
+dependencies {
+	// https://mvnrepository.com/artifact/org.ldaptive/ldaptive
+	compile group: 'org.ldaptive', name: 'ldaptive', version: '1.2.0'
+	compile group: 'org.ldaptive', name: 'ldaptive-beans', version: '1.2.0'
+
+	compile 'javax.servlet:javax.servlet-api:3.1.0'
+
+	compile('org.springframework.boot:spring-boot-starter-security')
+	compile('org.springframework.boot:spring-boot-starter-web')
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+	compile project(':bll');
+	compile project(':dal');
+	compile project(':presentation');
+}
