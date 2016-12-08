@@ -28,7 +28,7 @@ public class UsersController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void createUser(@RequestBody User user) {
         usersService.createUser(user);
-    }
+    } //TODO: model validation
 
     @RequestMapping(method = RequestMethod.DELETE, value = "{username}")
     public void deleteUser(@PathVariable String username){
