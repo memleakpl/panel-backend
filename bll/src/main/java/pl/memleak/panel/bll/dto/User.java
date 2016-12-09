@@ -5,9 +5,9 @@ package pl.memleak.panel.bll.dto;
  */
 public class User {
     private String username;
-    private String fullName;
+    private String firstName;
     private String email;
-    private String secondName;
+    private String lastName;
 
     public String getUsername() {
         return username;
@@ -17,12 +17,12 @@ public class User {
         this.username = username;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public String getEmail() {
@@ -33,11 +33,11 @@ public class User {
         this.email = email;
     }
 
-    public String getSecondName() {
-        return secondName;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setSecondName(String secondName) {
-        this.secondName = secondName;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

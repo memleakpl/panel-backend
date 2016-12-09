@@ -14,19 +14,22 @@ public class UserMapper {
     public static User toUser(LdapUser ldapUser){
         User user = new User();
         user.setUsername(ldapUser.getUsername());
-        user.setFullName(ldapUser.getDisplayName());
+        user.setFirstName(ldapUser.getGivenName());
         user.setEmail(ldapUser.getEmail());
-        user.setSecondName(ldapUser.getSn());
+        user.setLastName(ldapUser.getSn());
         return user;
     }
 
     public static LdapUser toLdapUser(User user, String krbDomain, String peopleBaseDn){
+        final String fullName = user.getFirstName() + " " + user.getLastName();
+
         LdapUser ldapUser = new LdapUser();
         ldapUser.setUsername(user.getUsername());
         ldapUser.setEmail(user.getEmail());
-        ldapUser.setCn(user.getFullName());
-        ldapUser.setDisplayName(user.getFullName());
-        ldapUser.setSn(user.getSecondName());
+        ldapUser.setCn(fullName);
+        ldapUser.setDisplayName(fullName);
+        ldapUser.setGivenName(user.getFirstName());
+        ldapUser.setSn(user.getLastName());
         ldapUser.setUserPassword(String.format(USER_PASSWORD_FORMAT, user.getUsername(), krbDomain));
         ldapUser.setDistinguishedName(String.format(USER_DN_FORMAT, user.getUsername(), peopleBaseDn));
         return ldapUser;
