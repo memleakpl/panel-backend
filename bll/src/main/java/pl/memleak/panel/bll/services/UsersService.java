@@ -24,6 +24,11 @@ public class UsersService implements IUsersService {
     }
 
     @Override
+    public User getUser(String username) {
+        return this.ldapDao.getUser(username);
+    }
+
+    @Override
     public void createUser(User user) {
         String realm = krbDao.getRealm();
         ldapDao.createUser(user, realm);

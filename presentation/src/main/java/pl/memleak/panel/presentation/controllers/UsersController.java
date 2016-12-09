@@ -30,6 +30,11 @@ public class UsersController {
         usersService.createUser(user);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/{username}")
+    public User getUser(@PathVariable  String username){
+        return usersService.getUser(username);
+    }
+
     @RequestMapping(method = RequestMethod.DELETE, value = "{username}")
     public void deleteUser(@PathVariable String username){
         usersService.deleteUser(username);
