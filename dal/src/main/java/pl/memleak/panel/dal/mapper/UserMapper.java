@@ -28,7 +28,7 @@ public class UserMapper {
         ldapUser.setEmail(user.getEmail());
         ldapUser.setCn(fullName);
         ldapUser.setDisplayName(fullName);
-        ldapUser.setGivenName(fullName);
+        ldapUser.setGivenName(user.getFirstName());
         ldapUser.setSn(user.getLastName());
         ldapUser.setUserPassword(String.format(USER_PASSWORD_FORMAT, user.getUsername(), krbDomain));
         ldapUser.setDistinguishedName(String.format(USER_DN_FORMAT, user.getUsername(), peopleBaseDn));
