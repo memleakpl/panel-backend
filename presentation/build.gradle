@@ -1,7 +1,25 @@
 version 'unspecified'
 
-apply plugin: 'java'
+buildscript {
+    ext {
+        springBootVersion = '1.4.2.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
 
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+
+jar {
+    baseName = 'demo'
+    version = '0.0.1-SNAPSHOT'
+}
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -9,10 +27,14 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    // https://mvnrepository.com/artifact/org.springframework/spring-web
-    compile group: 'org.springframework', name: 'spring-web', version: '4.3.4.RELEASE'
-    compile 'com.google.guava:guava:20.0'
+    compile('org.springframework.boot:spring-boot-starter-security')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile("org.springframework.security:spring-security-ldap")
+    compile("org.springframework:spring-tx")
+//    compile "org.grails.plugins:spring-security-core:2.0.0"
+    compile("org.apache.directory.server:apacheds-server-jndi:1.5.5")
     compile project(':bll')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
 }
