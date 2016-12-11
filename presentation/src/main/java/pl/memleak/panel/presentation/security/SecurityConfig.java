@@ -31,12 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         AuthenticationFilter authFilter = new AuthenticationFilter();
         authFilter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/api/login","POST"));
         authFilter.setAuthenticationManager(authenticationManagerBean());
-        authFilter.setAuthenticationSuccessHandler(new AuthenticationSuccessHandler() {
-            @Override
-            public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                response.setStatus(204);
-            }
-        });
+        authFilter.setAuthenticationSuccessHandler((request, response, authentication) -> response.setStatus(204));
         authFilter.setAuthenticationFailureHandler(
                 (request, response, exception) -> response.setStatus(401));
         authFilter.setUsernameParameter("username");
