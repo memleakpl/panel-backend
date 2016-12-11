@@ -2,6 +2,7 @@ package pl.memleak.panel.bll.services;
 
 import pl.memleak.panel.bll.dao.IKrbDao;
 import pl.memleak.panel.bll.dao.ILdapDao;
+import pl.memleak.panel.bll.dao.KrbException;
 import pl.memleak.panel.bll.dto.User;
 
 import java.util.List;
@@ -30,14 +31,30 @@ public class UsersService implements IUsersService {
 
     @Override
     public void createUser(User user) {
-        String realm = krbDao.getRealm();
-        ldapDao.createUser(user, realm);
-        krbDao.createPrincipal(user.getUsername());
+        String realm = null;
+        try {
+            realm = krbDao.getRealm();
+            ldapDao.createUser(user, realm);
+            krbDao.createPrincipal(user.getUsername(), generatePassword());
+        } catch (KrbException e) {
+            throw new RuntimeException(e);
+            // TODO perform rollback
+        }
     }
 
     @Override
     public void deleteUser(String username) {
-        ldapDao.deleteUser(username);
-        krbDao.deletePrincipal(username);
+        try {
+            ldapDao.deleteUser(username);
+            krbDao.deletePrincipal(username);
+        } catch (KrbException e) {
+            throw new RuntimeException(e);
+            // TODO perform rollback
+        }
+    }
+
+    private String generatePassword() {
+        // TODO implement password generation
+        return "password"; // https://www.xkcd.com/221/
     }
 }
