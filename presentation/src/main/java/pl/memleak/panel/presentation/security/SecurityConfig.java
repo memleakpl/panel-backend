@@ -25,7 +25,7 @@ import java.io.IOException;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 
-    static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SecurityConfig.class);
+    //static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SecurityConfig.class);
 
     public AuthenticationFilter authenticationFilter() throws Exception {
         AuthenticationFilter authFilter = new AuthenticationFilter();
