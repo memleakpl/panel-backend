@@ -54,8 +54,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth
                 .ldapAuthentication()
-                .userDnPatterns("uid={0},ou=people")
-                .groupSearchBase("ou=groups")
+                .userSearchBase("ou=people")
+                .userSearchFilter("(uid={0})")
                 .contextSource().url("ldaps://braintest.memleak.pl/dc=memleak,dc=pl");
     }
 
