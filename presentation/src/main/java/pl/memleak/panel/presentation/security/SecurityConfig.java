@@ -1,20 +1,17 @@
 package pl.memleak.panel.presentation.security;
 
+//import org.apache.tomcat.util.descriptor.web.LoginConfig;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import pl.memleak.panel.presentation.configuration.LoginConfig;
 
 /**
  * Created by wigdis on 04.12.16.
@@ -24,8 +21,12 @@ import java.io.IOException;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private LoginConfig loginConfig;
 
-    //static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SecurityConfig.class);
+    @SuppressWarnings("SpringJavaAutowiringInspection")
+    public SecurityConfig(@Qualifier("loginConfig") LoginConfig loginConfig){
+        this.loginConfig = loginConfig;
+    }
 
     public AuthenticationFilter authenticationFilter() throws Exception {
         AuthenticationFilter authFilter = new AuthenticationFilter();
@@ -34,8 +35,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         authFilter.setAuthenticationSuccessHandler((request, response, authentication) -> response.setStatus(204));
         authFilter.setAuthenticationFailureHandler(
                 (request, response, exception) -> response.setStatus(401));
-        authFilter.setUsernameParameter("username");
-        authFilter.setPasswordParameter("password");
         return authFilter;
     }
 
@@ -47,16 +46,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .anyRequest().authenticated();
-
     }
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth
                 .ldapAuthentication()
-                .userSearchBase("ou=people")
-                .userSearchFilter("(uid={0})")
-                .contextSource().url("ldaps://braintest.memleak.pl/dc=memleak,dc=pl");
+                .userSearchBase(loginConfig.getUserSearchBase())
+                .userSearchFilter(loginConfig.getUserSearchFilter())
+                .contextSource().url(loginConfig.getUrl());
     }
 
 }

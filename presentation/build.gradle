@@ -1,27 +1,6 @@
 version 'unspecified'
 
-buildscript {
-    ext {
-        springBootVersion = '1.4.2.RELEASE'
-    }
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-    }
-}
-
 apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'org.springframework.boot'
-
-jar {
-    baseName = 'demo'
-    version = '0.0.1-SNAPSHOT'
-}
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -33,9 +12,7 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile("org.springframework.security:spring-security-ldap")
     compile("org.springframework:spring-tx")
-    // https://mvnrepository.com/artifact/com.google.code.gson/gson
     compile group: 'com.google.code.gson', name: 'gson', version: '1.7.2'
-//    compile "org.grails.plugins:spring-security-core:2.0.0"
     compile("org.apache.directory.server:apacheds-server-jndi:1.5.5")
     compile project(':bll')
     testCompile('org.springframework.boot:spring-boot-starter-test')
