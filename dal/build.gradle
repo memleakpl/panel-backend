@@ -13,5 +13,6 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     compile group: 'org.ldaptive', name: 'ldaptive', version: '1.2.0'
     compile group: 'org.ldaptive', name: 'ldaptive-beans', version: '1.2.0'
+    compile group: 'pl.memleak', name: 'krbadmin', version: '0.0.3'
     compile project(":bll")
 }

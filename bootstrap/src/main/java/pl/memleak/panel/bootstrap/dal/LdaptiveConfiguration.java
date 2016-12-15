@@ -18,11 +18,11 @@ import pl.memleak.panel.dal.dao.LdapDao;
 
 /**
  * Created by Kamil on 19.11.2016.
-        */
+ */
 @Configuration
 @PropertySource("classpath:ldapconfig.properties")
-@PropertySource(value = "file:/etc/ldapconfig.properties", ignoreResourceNotFound = true)
-@PropertySource(value = "file:${LDAP_CONFIG}",ignoreResourceNotFound = true)
+@PropertySource(value = "file:/etc/memleak/ldapconfig.properties", ignoreResourceNotFound = true)
+@PropertySource(value = "file:${LDAP_CONFIG}", ignoreResourceNotFound = true)
 public class LdaptiveConfiguration {
     private Environment environment;
 
