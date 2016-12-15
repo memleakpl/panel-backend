@@ -31,10 +31,8 @@ public class UsersService implements IUsersService {
 
     @Override
     public void createUser(User user) {
-        String realm = null;
         try {
-            realm = krbDao.getRealm();
-            ldapDao.createUser(user, realm);
+            ldapDao.createUser(user, krbDao.getRealm());
             krbDao.createPrincipal(user.getUsername(), generatePassword());
         } catch (KrbException e) {
             throw new RuntimeException(e);
