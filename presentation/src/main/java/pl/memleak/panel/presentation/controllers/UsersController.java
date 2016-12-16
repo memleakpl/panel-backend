@@ -7,6 +7,7 @@ import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.bll.services.IUsersService;
 
 import java.util.List;
+
 /**
  * Created by maxmati on 11/26/16
  */
@@ -31,16 +32,16 @@ public class UsersController {
     } //TODO: model validation
 
     @RequestMapping(method = RequestMethod.GET, value = "/{username}")
-    public User getUser(@PathVariable  String username){
+    public User getUser(@PathVariable String username) {
         return usersService.getUser(username);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "{username}")
-    public void deleteUser(@PathVariable String username){
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{username}")
+    public void deleteUser(@PathVariable String username) {
         usersService.deleteUser(username);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value="/{username}/password")
+    @RequestMapping(method = RequestMethod.PUT, value = "/{username}/password")
     public void changePassword(@PathVariable String username, @RequestBody String password) {
         usersService.changePassword(username, password);
     }
