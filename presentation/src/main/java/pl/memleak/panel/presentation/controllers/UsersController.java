@@ -39,4 +39,9 @@ public class UsersController {
     public void deleteUser(@PathVariable String username){
         usersService.deleteUser(username);
     }
+
+    @RequestMapping(method = RequestMethod.PUT, value="/{username}/password")
+    public void changePassword(@PathVariable String username, @RequestBody String password) {
+        usersService.changePassword(username, password);
+    }
 }

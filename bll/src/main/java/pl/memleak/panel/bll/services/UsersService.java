@@ -51,6 +51,16 @@ public class UsersService implements IUsersService {
         }
     }
 
+    @Override
+    public void changePassword(String username, String password) {
+       try {
+           krbDao.changePassword(username, password);
+       } catch (KrbException e) {
+           throw new RuntimeException(e);
+           // TODO perform rollback
+       }
+    }
+
     private String generatePassword() {
         // TODO implement password generation
         return "password"; // https://www.xkcd.com/221/

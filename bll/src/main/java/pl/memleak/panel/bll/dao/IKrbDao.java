@@ -9,4 +9,6 @@ public interface IKrbDao {
     String getRealm() throws KrbException;
 
     void deletePrincipal(String username) throws KrbException;
+
+    void changePassword(String username, String password) throws KrbException;
 }

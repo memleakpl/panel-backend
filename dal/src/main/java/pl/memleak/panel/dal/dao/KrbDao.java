@@ -44,4 +44,13 @@ public class KrbDao implements IKrbDao {
             throw new KrbException("Failed to delete principal", e);
         }
     }
+
+    @Override
+    public void changePassword(String username, String password) throws KrbException {
+        try {
+            krbAdmin.changePassword(username, password);
+        } catch (KrbAdminException e) {
+            throw new KrbException("Failed to change principal password", e);
+        }
+    }
 }

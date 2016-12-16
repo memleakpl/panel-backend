@@ -14,4 +14,6 @@ public interface IUsersService {
     void createUser(User user);
 
     void deleteUser(String username);
+
+    void changePassword(String username, String password);
 }
