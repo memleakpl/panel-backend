@@ -37,7 +37,7 @@ public class UsersController {
         return usersService.getUser(username);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "{username}")
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{username}")
     public void deleteUser(@PathVariable String username){
         usersService.deleteUser(username);
     }
