@@ -22,13 +22,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private LoginConfig loginConfig;
 
     @SuppressWarnings("SpringJavaAutowiringInspection")
-    public SecurityConfig(@Qualifier("loginConfig") LoginConfig loginConfig){
+    public SecurityConfig(@Qualifier("loginConfig") LoginConfig loginConfig) {
         this.loginConfig = loginConfig;
     }
 
     public AuthenticationFilter authenticationFilter() throws Exception {
         AuthenticationFilter authFilter = new AuthenticationFilter();
-        authFilter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/api/login","POST"));
+        authFilter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/api/login", "POST"));
         authFilter.setAuthenticationManager(authenticationManagerBean());
         authFilter.setAuthenticationSuccessHandler((request, response, authentication) -> response.setStatus(204));
         authFilter.setAuthenticationFailureHandler(

@@ -6,23 +6,29 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import pl.memleak.panel.presentation.dto.LoginRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
-import java.io.IOException;
 
-public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+
+    private static Gson gson = new Gson();
+
+    public AuthenticationFilter() {
+        super(new AntPathRequestMatcher("/api/login", "POST"));
+    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
         if (!request.getMethod().equals("POST")) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
-        LoginRequest loginRequest = null;
-        loginRequest = this.getLoginRequest(request);
+
+        LoginRequest loginRequest = this.getLoginRequest(request);
 
         UsernamePasswordAuthenticationToken authRequest =
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
@@ -32,28 +38,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private LoginRequest getLoginRequest(HttpServletRequest request) {
 
-        BufferedReader reader = null;
-        LoginRequest loginRequest = null;
-
-        try {
-            reader = request.getReader();
-            Gson gson = new Gson();
-            loginRequest = gson.fromJson(reader, LoginRequest.class);
-        } catch(JsonSyntaxException ex) {
+        try (BufferedReader reader = request.getReader()) {
+            return gson.fromJson(reader, LoginRequest.class);
+        } catch (JsonSyntaxException ex) {
             throw new BadCredentialsException("Wrong json format.", ex);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                reader.close();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+        } catch (Exception ex) {
+            throw new BadCredentialsException("Unknown reason.");
         }
-
-        if (loginRequest == null) {
-            loginRequest = new LoginRequest();
-        }
-        return loginRequest;
     }
+
 }
