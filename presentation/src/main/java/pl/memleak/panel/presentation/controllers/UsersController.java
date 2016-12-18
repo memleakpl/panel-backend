@@ -3,7 +3,9 @@ package pl.memleak.panel.presentation.controllers;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import pl.memleak.panel.bll.dto.Mail;
 import pl.memleak.panel.bll.dto.User;
+import pl.memleak.panel.bll.services.IMailService;
 import pl.memleak.panel.bll.services.IUsersService;
 
 import java.util.List;
@@ -13,9 +15,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user")
 public class UsersController {
+    private final IMailService mailService;
     private IUsersService usersService;
 
-    public UsersController(@Qualifier(value = "usersService") IUsersService usersService) {
+    public UsersController(@Qualifier(value = "usersService") IUsersService usersService,
+                           @Qualifier(value = "mailService") IMailService mailService) {
+        this.mailService = mailService;
         this.usersService = usersService;
     }
 
