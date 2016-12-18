@@ -1,16 +1,7 @@
 version 'unspecified'
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.2.RELEASE")
-    }
-}
 
 apply plugin: 'java'
-apply plugin: 'org.springframework.boot'
 
 repositories {
     mavenCentral()
@@ -19,13 +10,13 @@ repositories {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-security')
-    compile('org.springframework.boot:spring-boot-starter-web')
-    compile("org.springframework.security:spring-security-ldap")
-    compile("org.springframework:spring-tx")
+    compile('org.springframework.boot:spring-boot-starter-security:1.4.2.RELEASE')
+    compile("org.springframework:spring-tx:4.2.0.RELEASE")
+    compile("org.springframework.security:spring-security-ldap:4.2.0.RELEASE")
     compile group: 'com.google.code.gson', name: 'gson', version: '1.7.2'
     compile("org.apache.directory.server:apacheds-server-jndi:1.5.5")
     compile project(':bll')
-    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('org.springframework.boot:spring-boot-starter-test:1.4.2.RELEASE')
 }

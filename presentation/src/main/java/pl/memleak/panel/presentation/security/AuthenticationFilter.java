@@ -43,7 +43,7 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
         } catch (JsonSyntaxException ex) {
             throw new BadCredentialsException("Wrong json format.", ex);
         } catch (Exception ex) {
-            throw new BadCredentialsException("Unknown reason.");
+            throw new BadCredentialsException("Unknown reason.", ex);
         }
     }
 
