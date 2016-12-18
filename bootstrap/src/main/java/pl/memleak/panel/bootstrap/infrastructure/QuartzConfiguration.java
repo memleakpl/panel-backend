@@ -22,7 +22,7 @@ public class QuartzConfiguration {
     }
 
     @Bean
-    public Scheduler quartzScheduler() throws SchedulerException {
+    public Scheduler scheduler() throws SchedulerException {
         Scheduler scheduler = new StdSchedulerFactory().getScheduler();
         scheduler.setJobFactory(new BeanJobFactory(context.getAutowireCapableBeanFactory()));
         scheduler.start();

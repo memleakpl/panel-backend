@@ -1,6 +1,7 @@
 package pl.memleak.panel.bootstrap.infrastructure;
 
 import org.quartz.Scheduler;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -40,7 +41,8 @@ public class MailConfiguration {
     }
 
     @Bean
-    public MailService mailService(Scheduler scheduler, IMailDao mailDao){
+    public MailService mailService(@Qualifier(value = "scheduler") Scheduler scheduler,
+                                   @Qualifier(value = "mailDao") IMailDao mailDao){
         return new MailService(scheduler, mailDao);
     }
 }

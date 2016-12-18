@@ -15,12 +15,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user")
 public class UsersController {
-    private final IMailService mailService;
     private IUsersService usersService;
 
-    public UsersController(@Qualifier(value = "usersService") IUsersService usersService,
-                           @Qualifier(value = "mailService") IMailService mailService) {
-        this.mailService = mailService;
+    public UsersController(@Qualifier(value = "usersService") IUsersService usersService) {
         this.usersService = usersService;
     }
 

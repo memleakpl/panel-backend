@@ -26,7 +26,7 @@ public class HibernateConfiguration {
         return new MailDao(sessionFactory);
     }
 
-    @Bean()
+    @Bean
     public SessionFactory sessionFactory()
     {
         ServiceRegistry standardRegistry =
