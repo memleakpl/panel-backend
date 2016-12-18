@@ -48,7 +48,8 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-security')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
-	compile project(':bll');
-	compile project(':dal');
-	compile project(':presentation');
+	compile project(':bll')
+	compile project(':dal')
+	compile project(':presentation')
+	compile project(':infrastructure')
 }
