@@ -21,8 +21,18 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException, ServletException {
 
-        ApplicationAuthenticationException authenticationException =
-                (ApplicationAuthenticationException) exception;
+        ApplicationAuthenticationException authenticationException;
+
+        if ((exception instanceof ApplicationAuthenticationException)) {
+            authenticationException =
+                    (ApplicationAuthenticationException) exception;
+        } else if (exception instanceof AuthenticationException){
+            authenticationException = new ApplicationAuthenticationException(exception.getMessage(),
+                    ExceptionType.UNAUTHORIZED, exception);
+        } else {
+            authenticationException = new ApplicationAuthenticationException(exception.getMessage(),
+                    ExceptionType.INTERNAL, exception);
+        }
 
         response.setStatus(authenticationException.getExceptionType().getCode());
         response.getWriter().write(authenticationException.toJSONFormat());

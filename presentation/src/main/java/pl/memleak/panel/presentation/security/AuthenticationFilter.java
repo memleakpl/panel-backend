@@ -47,7 +47,7 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
         } catch (JsonSyntaxException ex) {
             throw new ApplicationAuthenticationException("Wrong json format", ExceptionType.BAD_REQUEST, ex);
         } catch (Exception ex) {
-            throw new ApplicationAuthenticationException("Unknown reason", ExceptionType.BAD_REQUEST, ex);
+            throw new ApplicationAuthenticationException("Unknown reason", ExceptionType.INTERNAL, ex);
         }
     }
 
