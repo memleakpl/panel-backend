@@ -43,7 +43,6 @@ public class UsersController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{username}/password")
-    @ExceptionHandler(UnauthorizedException.class)
     public void changePassword(@PathVariable String username, @RequestBody ChangePasswordRequest
             changePasswordRequest) {
         if (!usersService.authenticate(username, changePasswordRequest.getOldPassword()))
