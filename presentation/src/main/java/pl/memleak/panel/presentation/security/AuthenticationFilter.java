@@ -3,9 +3,9 @@ package pl.memleak.panel.presentation.security;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import pl.memleak.panel.presentation.dto.LoginRequest;
@@ -33,11 +33,8 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
         UsernamePasswordAuthenticationToken authRequest =
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
 
-        try {
-            return this.getAuthenticationManager().authenticate(authRequest);
-        } catch (AuthenticationException ex) {
-            throw new ApplicationAuthenticationException("Bad credentials", ExceptionType.BAD_CREDENTIALS, ex);
-        }
+        return this.getAuthenticationManager().authenticate(authRequest);
+
     }
 
     private LoginRequest getLoginRequest(HttpServletRequest request) {
@@ -45,9 +42,9 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
         try (BufferedReader reader = request.getReader()) {
             return gson.fromJson(reader, LoginRequest.class);
         } catch (JsonSyntaxException ex) {
-            throw new ApplicationAuthenticationException("Wrong json format", ExceptionType.BAD_REQUEST, ex);
+            throw new BadRequestAuthenticationException("Wrong json format", ex);
         } catch (Exception ex) {
-            throw new ApplicationAuthenticationException("Unknown reason", ExceptionType.INTERNAL, ex);
+            throw new InternalAuthenticationServiceException("", ex);
         }
     }
 

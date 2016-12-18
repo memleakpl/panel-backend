@@ -2,6 +2,8 @@ package pl.memleak.panel.presentation.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
@@ -21,24 +23,13 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException, ServletException {
 
-        ApplicationAuthenticationException authenticationException;
-
-        if ((exception instanceof ApplicationAuthenticationException)) {
-            authenticationException =
-                    (ApplicationAuthenticationException) exception;
-        } else if (exception instanceof AuthenticationException){
-            authenticationException = new ApplicationAuthenticationException(exception.getMessage(),
-                    ExceptionType.UNAUTHORIZED, exception);
+        if ((exception instanceof InternalAuthenticationServiceException)) {
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        } else if (exception instanceof BadRequestAuthenticationException) {
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
         } else {
-            authenticationException = new ApplicationAuthenticationException(exception.getMessage(),
-                    ExceptionType.INTERNAL, exception);
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
         }
 
-        response.setStatus(authenticationException.getExceptionType().getCode());
-        response.getWriter().write(authenticationException.toJSONFormat());
-        response.getWriter().flush();
-        response.getWriter().close();
-
-        logger.info("Authentication failed", exception);
     }
 }

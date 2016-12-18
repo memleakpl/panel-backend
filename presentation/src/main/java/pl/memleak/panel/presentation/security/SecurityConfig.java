@@ -3,6 +3,7 @@ package pl.memleak.panel.presentation.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import pl.memleak.panel.presentation.configuration.LoginConfig;
+import pl.memleak.panel.presentation.configuration.LoginConfiguration;
 
 /**
  * Created by wigdis on 04.12.16.
@@ -17,11 +19,12 @@ import pl.memleak.panel.presentation.configuration.LoginConfig;
 
 @Configuration
 @EnableWebSecurity
+@Import(LoginConfiguration.class)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private LoginConfig loginConfig;
 
-    @SuppressWarnings("SpringJavaAutowiringInspection")
+
     public SecurityConfig(@Qualifier("loginConfig") LoginConfig loginConfig) {
         this.loginConfig = loginConfig;
     }
