@@ -3,6 +3,7 @@ package pl.memleak.panel.presentation.controllers;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import pl.memleak.panel.bll.dto.ChangePasswordRequest;
 import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.bll.services.IUsersService;
 
@@ -42,7 +43,8 @@ public class UsersController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{username}/password")
-    public void changePassword(@PathVariable String username, @RequestBody String password) {
-        usersService.changePassword(username, password);
+
+    public void changePassword(@PathVariable String username, @RequestBody ChangePasswordRequest changePasswordRequest) {
+        usersService.changePassword(username, changePasswordRequest);
     }
 }

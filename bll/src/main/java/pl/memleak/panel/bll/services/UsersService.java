@@ -3,6 +3,7 @@ package pl.memleak.panel.bll.services;
 import pl.memleak.panel.bll.dao.IKrbDao;
 import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dao.KrbException;
+import pl.memleak.panel.bll.dto.ChangePasswordRequest;
 import pl.memleak.panel.bll.dto.User;
 
 import java.util.List;
@@ -52,9 +53,9 @@ public class UsersService implements IUsersService {
     }
 
     @Override
-    public void changePassword(String username, String password) {
+    public void changePassword(String username, ChangePasswordRequest changePasswordRequest) {
        try {
-           krbDao.changePassword(username, password);
+           krbDao.changePassword(username, changePasswordRequest.getNewPassword());
        } catch (KrbException e) {
            throw new RuntimeException(e);
            // TODO perform rollback
