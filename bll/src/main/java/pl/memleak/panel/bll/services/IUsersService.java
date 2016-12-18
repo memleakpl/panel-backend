@@ -16,5 +16,7 @@ public interface IUsersService {
 
     void deleteUser(String username);
 
-    void changePassword(String username, ChangePasswordRequest changePasswordRequest);
+    boolean authenticate(String username, String password);
+
+    void changePassword(String username, String password);
 }

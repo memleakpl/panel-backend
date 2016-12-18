@@ -43,8 +43,11 @@ public class UsersController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{username}/password")
-
-    public void changePassword(@PathVariable String username, @RequestBody ChangePasswordRequest changePasswordRequest) {
-        usersService.changePassword(username, changePasswordRequest);
+    @ExceptionHandler(UnauthorizedException.class)
+    public void changePassword(@PathVariable String username, @RequestBody ChangePasswordRequest
+            changePasswordRequest) {
+        if (!usersService.authenticate(username, changePasswordRequest.getOldPassword()))
+            throw new UnauthorizedException("Invalid credentials");
+        usersService.changePassword(username, changePasswordRequest.getNewPassword());
     }
 }

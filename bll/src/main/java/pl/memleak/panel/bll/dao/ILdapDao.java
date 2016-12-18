@@ -19,4 +19,6 @@ public interface ILdapDao {
     void createUser(User user, String realm);
 
     void deleteUser(String username);
+
+    boolean authenticate(String username, String password);
 }
