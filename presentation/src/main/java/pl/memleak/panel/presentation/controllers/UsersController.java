@@ -2,6 +2,8 @@ package pl.memleak.panel.presentation.controllers;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.memleak.panel.bll.dto.ChangePasswordRequest;
 import pl.memleak.panel.bll.dto.User;
@@ -42,11 +44,20 @@ public class UsersController {
         usersService.deleteUser(username);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/{username}/password")
-    public void changePassword(@PathVariable String username, @RequestBody ChangePasswordRequest
+    @RequestMapping(method = RequestMethod.PUT, value = "/password")
+    public void changePassword(@RequestBody ChangePasswordRequest
             changePasswordRequest) {
+        Authentication principal = SecurityContextHolder.getContext().getAuthentication();
+        String username;
+
+        if(principal == null)
+            throw new RuntimeException("Missing authentication principal");
+
+        username = principal.getName();
+
         if (!usersService.authenticate(username, changePasswordRequest.getOldPassword()))
             throw new UnauthorizedException("Invalid credentials");
+
         usersService.changePassword(username, changePasswordRequest.getNewPassword());
     }
 }
