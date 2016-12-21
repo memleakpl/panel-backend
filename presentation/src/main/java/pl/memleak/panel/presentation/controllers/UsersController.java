@@ -44,13 +44,12 @@ public class UsersController {
         usersService.deleteUser(username);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/password")
-    public void changePassword(@RequestBody ChangePasswordRequest
-            changePasswordRequest) {
+    @RequestMapping(method = RequestMethod.POST, value = "/password")
+    public void changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
         Authentication principal = SecurityContextHolder.getContext().getAuthentication();
         String username;
 
-        if(principal == null)
+        if (principal == null)
             throw new RuntimeException("Missing authentication principal");
 
         username = principal.getName();
