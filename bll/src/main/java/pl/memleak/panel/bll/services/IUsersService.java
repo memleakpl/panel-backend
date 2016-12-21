@@ -1,5 +1,6 @@
 package pl.memleak.panel.bll.services;
 
+import pl.memleak.panel.bll.dto.ChangePasswordRequest;
 import pl.memleak.panel.bll.dto.User;
 
 import java.util.List;
@@ -14,4 +15,8 @@ public interface IUsersService {
     void createUser(User user);
 
     void deleteUser(String username);
+
+    boolean authenticate(String username, String password);
+
+    void changePassword(String username, String password);
 }

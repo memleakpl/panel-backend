@@ -51,6 +51,20 @@ public class UsersService implements IUsersService {
         }
     }
 
+    @Override
+    public boolean authenticate(String username, String password) {
+        return ldapDao.authenticate(username, password);
+    }
+
+    @Override
+    public void changePassword(String username, String password) {
+        try {
+            krbDao.changePassword(username, password);
+        } catch (KrbException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private String generatePassword() {
         // TODO implement password generation
         return "password"; // https://www.xkcd.com/221/
