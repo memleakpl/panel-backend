@@ -45,6 +45,7 @@ public class UsersController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
         Authentication principal = SecurityContextHolder.getContext().getAuthentication();
         String username;
