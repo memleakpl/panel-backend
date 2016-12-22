@@ -10,11 +10,16 @@ public class LdapConfig {
     private String allUsersFilter;
     private String defaultUserBaseDn;
     private String defaultGroupBaseDn;
+    private String allGroupsFilter;
 
-    public LdapConfig(String uidFilter, String cnFilter, String allUsersFilter, String defaultUserBaseDn, String defaultGroupBaseDn) {
+    public LdapConfig(
+            String uidFilter, String cnFilter,
+            String allUsersFilter, String allGroupsFilter,
+            String defaultUserBaseDn, String defaultGroupBaseDn) {
         this.uidFilter = uidFilter;
         this.cnFilter = cnFilter;
         this.allUsersFilter = allUsersFilter;
+        this.allGroupsFilter = allGroupsFilter;
         this.defaultUserBaseDn = defaultUserBaseDn;
         this.defaultGroupBaseDn = defaultGroupBaseDn;
     }
@@ -37,5 +42,9 @@ public class LdapConfig {
 
     public String getDefaultGroupBaseDn() {
         return defaultGroupBaseDn;
+    }
+
+    public String getAllGroupsFilter() {
+        return allGroupsFilter;
     }
 }
