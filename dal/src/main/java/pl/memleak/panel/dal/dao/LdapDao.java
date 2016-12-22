@@ -36,11 +36,19 @@ public class LdapDao implements ILdapDao {
 
     @Override
     public User getUser(String baseDn, String username) {
+        LdapUser ldapUser = getRawUser(baseDn, username);
+        return UserMapper.toUser(ldapUser);
+    }
+
+    private LdapUser getRawUser(String username) {
+        return getRawUser(ldapConfig.getDefaultUserBaseDn(), username);
+    }
+
+    private LdapUser getRawUser(String baseDn, String username) {
         SearchFilter userFilter = new SearchFilter(ldapConfig.getUidFilter());
         userFilter.setParameter("uid", username);
-        LdapUser ldapUser = query(baseDn, userFilter, LdapUser.class).stream()
+        return query(baseDn, userFilter, LdapUser.class).stream()
                 .findFirst().orElseThrow(() -> new RuntimeException("User " + username + " was not found"));
-        return UserMapper.toUser(ldapUser);
     }
 
     @Override
@@ -77,7 +85,10 @@ public class LdapDao implements ILdapDao {
 
     @Override
     public void createGroup(Group group) {
-        LdapGroup ldapGroup = GroupMapper.toLdapGroup(group, ldapConfig.getDefaultGroupBaseDn());
+        LdapGroup ldapGroup = GroupMapper.toLdapGroup(
+                group, this.getRawUser(group.getOwner()),
+                ldapConfig.getDefaultGroupBaseDn());
+
         DefaultLdapEntryMapper<LdapGroup> mapper = new DefaultLdapEntryMapper<>();
         LdapEntry ldapEntry = mapper.map(ldapGroup);
 

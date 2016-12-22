@@ -1,7 +1,9 @@
 package pl.memleak.panel.dal.mapper;
 
 import pl.memleak.panel.bll.dto.Group;
+import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.dal.dto.LdapGroup;
+import pl.memleak.panel.dal.dto.LdapUser;
 
 /**
  * Created by maxmati on 12/22/16
@@ -18,11 +20,11 @@ public class GroupMapper {
         );
     }
 
-    public static LdapGroup toLdapGroup(Group group, String defaultGroupBaseDn) { //TODO: missing owner mapping
+    public static LdapGroup toLdapGroup(Group group, LdapUser owner, String defaultGroupBaseDn) {
         return new LdapGroup(
                 String.format(GROUP_DN_FORMAT, group.getName(), defaultGroupBaseDn),
                 group.getName(),
-                group.getOwner(),
+                owner.getDistinguishedName(),
                 group.getDescription()
         );
     }
