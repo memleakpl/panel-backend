@@ -8,11 +8,22 @@ import pl.memleak.panel.dal.dto.LdapGroup;
  */
 public class GroupMapper {
 
+    private static final String GROUP_DN_FORMAT = "cn=%s,%s";
+
     public static Group toGroup(LdapGroup ldapGroup){
         return new Group(
                 ldapGroup.getName(),
                 ldapGroup.getOwner(),
                 ldapGroup.getDescription()
+        );
+    }
+
+    public static LdapGroup toLdapGroup(Group group, String defaultGroupBaseDn) { //TODO: missing owner mapping
+        return new LdapGroup(
+                String.format(GROUP_DN_FORMAT, group.getName(), defaultGroupBaseDn),
+                group.getName(),
+                group.getOwner(),
+                group.getDescription()
         );
     }
 }

@@ -19,6 +19,8 @@ public interface ILdapDao {
 
     void createUser(User user, String realm);
 
+    void createGroup(Group group);
+
     void deleteUser(String username);
 
     List<Group> getAllGroups();
