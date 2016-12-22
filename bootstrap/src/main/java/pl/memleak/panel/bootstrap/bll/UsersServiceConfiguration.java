@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Import;
 import pl.meleak.panel.infrastructure.mail.MailService;
 import pl.memleak.panel.bll.dao.IKrbDao;
 import pl.memleak.panel.bll.dao.ILdapDao;
+import pl.memleak.panel.bll.dto.EnvelopeConfig;
 import pl.memleak.panel.bll.services.IUsersService;
 import pl.memleak.panel.bll.services.UsersService;
 import pl.memleak.panel.bootstrap.dal.KrbAdminConfiguration;
@@ -22,18 +23,21 @@ public class UsersServiceConfiguration {
     private ILdapDao ldapDao;
     private IKrbDao krbDao;
     private MailService mailService;
+    private EnvelopeConfig envelopeConfig;
 
     public UsersServiceConfiguration(
             @Qualifier("ldapDao") ILdapDao ldapDao,
             @Qualifier("krbDao") IKrbDao krbDao,
-            @Qualifier("mailService") MailService mailService) {
+            @Qualifier("mailService") MailService mailService,
+            @Qualifier("envelopeConfig") EnvelopeConfig envelopeConfig) {
         this.ldapDao = ldapDao;
         this.krbDao = krbDao;
         this.mailService = mailService;
+        this.envelopeConfig = envelopeConfig;
     }
 
     @Bean(name = "usersService")
     public IUsersService usersService(){
-        return new UsersService(ldapDao, krbDao, mailService);
+        return new UsersService(ldapDao, krbDao, mailService, envelopeConfig);
     }
 }
