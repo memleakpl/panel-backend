@@ -3,7 +3,6 @@ package pl.memleak.panel.bll.services;
 import pl.memleak.panel.bll.dao.IKrbDao;
 import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dao.KrbException;
-import pl.memleak.panel.bll.dto.EnvelopeConfig;
 import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
 
@@ -16,15 +15,14 @@ public class UsersService implements IUsersService {
     private ILdapDao ldapDao;
     private IKrbDao krbDao;
     private IMailService mailService;
+    private UserCreatedMailBuilder userCreatedMailBuilder;
 
-    private final UserCreatedMailBuilder userCreatedMailBuilder;
-
-    public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IMailService mailService, EnvelopeConfig envelopeConfig) {
+    public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IMailService mailService, UserCreatedMailBuilder
+            userCreatedMailBuilder) {
         this.ldapDao = ldapDao;
         this.krbDao = krbDao;
         this.mailService = mailService;
-        this.userCreatedMailBuilder = new UserCreatedMailBuilder(envelopeConfig.getSender(),
-                envelopeConfig.getCreateUserSubject());
+        this.userCreatedMailBuilder = userCreatedMailBuilder;
     }
 
     @Override
