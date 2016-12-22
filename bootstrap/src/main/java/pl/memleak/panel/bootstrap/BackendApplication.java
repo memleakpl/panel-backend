@@ -49,7 +49,8 @@ public class BackendApplication extends SpringBootServletInitializer {
 
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins(env.getProperty(HTTP_CORS_KEY));
+                registry.addMapping("/**").allowedOrigins(env.getProperty(HTTP_CORS_KEY))
+						.allowedMethods("POST", "GET", "PUT", "DELETE");
             }
         };
     }
