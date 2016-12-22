@@ -19,7 +19,7 @@ import pl.memleak.panel.bootstrap.dal.HibernateConfiguration;
 @Import({QuartzConfiguration.class, HibernateConfiguration.class})
 @PropertySource("classpath:smtp.properties")
 @PropertySource(value = "file:/etc/memleak/smtp.properties", ignoreResourceNotFound = true)
-@PropertySource(value = "file:${LDAP_CONFIG}", ignoreResourceNotFound = true)
+@PropertySource(value = "file:${SMTP_CONFIG}", ignoreResourceNotFound = true)
 @Configuration
 public class MailConfiguration {
     private Environment env;
