@@ -26,8 +26,7 @@ dist/
 nbdist/
 .nb-gradle/
 
-### Hibernate ###
+### Local configuration files ###
 hibernate.cfg.xml
-
-### KrbAdmin ###
 krbadmin.properties
+mail.properties
