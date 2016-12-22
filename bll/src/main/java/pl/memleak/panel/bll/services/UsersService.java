@@ -3,6 +3,7 @@ package pl.memleak.panel.bll.services;
 import pl.memleak.panel.bll.dao.IKrbDao;
 import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dao.KrbException;
+import pl.memleak.panel.bll.dto.Mail;
 import pl.memleak.panel.bll.dto.User;
 
 import java.util.List;
@@ -13,10 +14,12 @@ import java.util.List;
 public class UsersService implements IUsersService {
     private ILdapDao ldapDao;
     private IKrbDao krbDao;
+    private IMailService mailService;
 
-    public UsersService(ILdapDao ldapDao, IKrbDao krbDao) {
+    public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IMailService mailService) {
         this.ldapDao = ldapDao;
         this.krbDao = krbDao;
+        this.mailService = mailService;
     }
 
     @Override

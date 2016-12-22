@@ -1,6 +1,5 @@
 package pl.memleak.panel.bll.services;
 
-import pl.memleak.panel.bll.dto.ChangePasswordRequest;
 import pl.memleak.panel.bll.dto.User;
 
 import java.util.List;
