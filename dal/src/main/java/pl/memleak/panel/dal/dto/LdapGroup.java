@@ -13,12 +13,32 @@ import java.util.List;
 @Entry(dn = "distinguishedName",
         attributes = {
                 @Attribute(name = "cn", property = "name"),
-                @Attribute(name = "member", property = "members")
+                @Attribute(name = "member", property = "members"),
+                @Attribute(name = "owner", property = "owner"),
+                @Attribute(name = "description", property = "description")
         })
 public class LdapGroup {
     private String distinguishedName;
     private String name;
     private List<String> members;
+    private String owner;
+    private String description;
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getDistinguishedName() {
         return distinguishedName;

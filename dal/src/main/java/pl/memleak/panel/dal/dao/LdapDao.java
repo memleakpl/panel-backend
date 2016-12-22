@@ -7,10 +7,12 @@ import org.ldaptive.auth.BindAuthenticationHandler;
 import org.ldaptive.auth.SearchDnResolver;
 import org.ldaptive.beans.reflect.DefaultLdapEntryMapper;
 import pl.memleak.panel.bll.dao.ILdapDao;
+import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.dal.configuration.LdapConfig;
 import pl.memleak.panel.dal.dto.LdapGroup;
 import pl.memleak.panel.dal.dto.LdapUser;
+import pl.memleak.panel.dal.mapper.GroupMapper;
 import pl.memleak.panel.dal.mapper.UserMapper;
 
 import java.util.List;
@@ -47,6 +49,16 @@ public class LdapDao implements ILdapDao {
         SearchFilter userFilter = new SearchFilter(ldapConfig.getAllUsersFilter());
         List<LdapUser> ldapUsers = query(baseDn, userFilter, LdapUser.class);
         return ldapUsers.stream().map(UserMapper::toUser).collect(Collectors.toList());
+    }
+
+    public List<Group> getAllGroups() {
+        return getAllGroups(ldapConfig.getDefaultGroupBaseDn());
+    }
+
+    public List<Group> getAllGroups(String baseDn) {
+        SearchFilter groupFilter = new SearchFilter(ldapConfig.getAllGroupsFilter());
+        List<LdapGroup> ldapGroups = query(baseDn, groupFilter, LdapGroup.class);
+        return ldapGroups.stream().map(GroupMapper::toGroup).collect(Collectors.toList());
     }
 
     @Override

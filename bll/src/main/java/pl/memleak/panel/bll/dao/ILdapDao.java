@@ -1,5 +1,6 @@
 package pl.memleak.panel.bll.dao;
 
+import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.dto.User;
 
 import java.util.List;
@@ -19,6 +20,10 @@ public interface ILdapDao {
     void createUser(User user, String realm);
 
     void deleteUser(String username);
+
+    List<Group> getAllGroups();
+
+    List<Group> getAllGroups(String baseDn);
 
     boolean authenticate(String username, String password);
 }
