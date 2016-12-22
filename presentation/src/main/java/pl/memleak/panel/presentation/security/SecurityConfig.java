@@ -29,7 +29,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         this.loginConfig = loginConfig;
     }
 
-    public AuthenticationFilter authenticationFilter() throws Exception {
+    private AuthenticationFilter authenticationFilter() throws Exception {
         AuthenticationFilter authFilter = new AuthenticationFilter();
         authFilter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/api/login", "POST"));
         authFilter.setAuthenticationManager(authenticationManagerBean());
@@ -46,7 +46,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .cors().and()
                 .authorizeRequests()
-                .anyRequest().authenticated();
+                .anyRequest().authenticated().and()
+                .logout()
+                .logoutUrl("/api/logout")
+                .logoutSuccessHandler((request, response, authentication) -> response.setStatus(204));
     }
 
     @Autowired
