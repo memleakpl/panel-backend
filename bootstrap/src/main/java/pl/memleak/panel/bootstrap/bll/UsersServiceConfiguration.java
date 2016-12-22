@@ -12,12 +12,11 @@ import pl.memleak.panel.bll.services.IUsersService;
 import pl.memleak.panel.bll.services.UsersService;
 import pl.memleak.panel.bootstrap.dal.KrbAdminConfiguration;
 import pl.memleak.panel.bootstrap.dal.LdaptiveConfiguration;
-import pl.memleak.panel.bootstrap.infrastructure.MailConfiguration;
 
 /**
  * Created by maxmati on 11/30/16
  */
-@Import({LdaptiveConfiguration.class, KrbAdminConfiguration.class, MailConfiguration.class})
+@Import({LdaptiveConfiguration.class, KrbAdminConfiguration.class})
 @Configuration
 public class UsersServiceConfiguration {
     private ILdapDao ldapDao;
