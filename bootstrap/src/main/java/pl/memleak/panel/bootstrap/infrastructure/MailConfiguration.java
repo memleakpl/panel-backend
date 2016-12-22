@@ -11,15 +11,16 @@ import pl.meleak.panel.infrastructure.mail.IMailDao;
 import pl.meleak.panel.infrastructure.mail.MailConfig;
 import pl.meleak.panel.infrastructure.mail.MailExecutor;
 import pl.meleak.panel.infrastructure.mail.MailService;
+import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
 import pl.memleak.panel.bootstrap.dal.HibernateConfiguration;
 
 /**
  * Created by maxmati on 12/18/16
  */
 @Import({QuartzConfiguration.class, HibernateConfiguration.class})
-@PropertySource("classpath:smtp.properties")
-@PropertySource(value = "file:/etc/memleak/smtp.properties", ignoreResourceNotFound = true)
-@PropertySource(value = "file:${LDAP_CONFIG}", ignoreResourceNotFound = true)
+@PropertySource("classpath:mail.properties")
+@PropertySource(value = "file:/etc/memleak/mail.properties", ignoreResourceNotFound = true)
+@PropertySource(value = "file:${MAIL_CONFIG}", ignoreResourceNotFound = true)
 @Configuration
 public class MailConfiguration {
     private Environment env;
@@ -44,5 +45,12 @@ public class MailConfiguration {
     public MailService mailService(@Qualifier(value = "scheduler") Scheduler scheduler,
                                    @Qualifier(value = "mailDao") IMailDao mailDao){
         return new MailService(scheduler, mailDao);
+    }
+
+    @Bean
+    public UserCreatedMailBuilder userCreatedMailBuilder() {
+        return new UserCreatedMailBuilder(
+                env.getProperty("envelope.sender"),
+                env.getProperty("envelope.createUserSubject"));
     }
 }

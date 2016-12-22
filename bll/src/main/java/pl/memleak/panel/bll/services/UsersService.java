@@ -4,6 +4,7 @@ import pl.memleak.panel.bll.dao.IKrbDao;
 import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dao.KrbException;
 import pl.memleak.panel.bll.dto.User;
+import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
 
 import java.util.List;
 
@@ -13,10 +14,15 @@ import java.util.List;
 public class UsersService implements IUsersService {
     private ILdapDao ldapDao;
     private IKrbDao krbDao;
+    private IMailService mailService;
+    private UserCreatedMailBuilder userCreatedMailBuilder;
 
-    public UsersService(ILdapDao ldapDao, IKrbDao krbDao) {
+    public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IMailService mailService, UserCreatedMailBuilder
+            userCreatedMailBuilder) {
         this.ldapDao = ldapDao;
         this.krbDao = krbDao;
+        this.mailService = mailService;
+        this.userCreatedMailBuilder = userCreatedMailBuilder;
     }
 
     @Override
@@ -32,8 +38,15 @@ public class UsersService implements IUsersService {
     @Override
     public void createUser(User user) {
         try {
+            String password = generatePassword();
+
             ldapDao.createUser(user, krbDao.getRealm());
-            krbDao.createPrincipal(user.getUsername(), generatePassword());
+            krbDao.createPrincipal(user.getUsername(), password);
+
+            userCreatedMailBuilder.setUser(user);
+            userCreatedMailBuilder.setPassword(password);
+
+            mailService.sendMail(userCreatedMailBuilder.build());
         } catch (KrbException e) {
             throw new RuntimeException(e);
             // TODO perform rollback
