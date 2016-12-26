@@ -26,4 +26,6 @@ public interface ILdapDao {
     List<Group> getAllGroups(String baseDn);
 
     boolean authenticate(String username, String password);
+
+    void deleteGroup(String groupname);
 }

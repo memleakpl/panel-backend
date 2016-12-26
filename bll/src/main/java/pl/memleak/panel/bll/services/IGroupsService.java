@@ -9,4 +9,6 @@ import java.util.List;
  */
 public interface IGroupsService {
     List<Group> getAllGroups();
+
+    void deleteGroup(String groupname);
 }

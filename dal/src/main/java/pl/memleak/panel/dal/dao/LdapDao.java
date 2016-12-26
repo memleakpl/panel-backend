@@ -12,6 +12,7 @@ import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.dal.configuration.LdapConfig;
 import pl.memleak.panel.dal.dto.LdapGroup;
 import pl.memleak.panel.dal.dto.LdapUser;
+import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
 import pl.memleak.panel.dal.mapper.GroupMapper;
 import pl.memleak.panel.dal.mapper.UserMapper;
 
@@ -115,6 +116,23 @@ public class LdapDao implements ILdapDao {
         }
     }
 
+    @Override
+    public void deleteGroup(String groupname) {
+        LdapGroup toDelete = getGroup(groupname);
+
+        Connection conn = null;
+        try {
+            conn = connectionFactory.getConnection();
+            conn.open();
+            DeleteOperation delete = new DeleteOperation(conn);
+            delete.execute(new DeleteRequest(toDelete.getDistinguishedName()));
+        } catch (LdapException e) {
+            throw new RuntimeException("Unable to execute LDAP delete command", e);
+        } finally {
+            if (conn != null) conn.close();
+        }
+    }
+
     public LdapGroup getGroup(String groupname) {
         return getGroup(ldapConfig.getDefaultGroupBaseDn(), groupname);
     }
@@ -123,7 +141,7 @@ public class LdapDao implements ILdapDao {
         SearchFilter groupFilter = new SearchFilter(ldapConfig.getCnFilter());
         groupFilter.setParameter("cn", groupname);
         return query(baseDn, groupFilter, LdapGroup.class).stream()
-                .findFirst().orElseThrow(() -> new RuntimeException("Group " + groupname + " was not found"));
+                .findFirst().orElseThrow(() -> new EntityNotFoundException("Group " + groupname + " was not found"));
     }
 
     private <T> List<T> query(String baseDn, SearchFilter filter, Class<T> targetClass) {

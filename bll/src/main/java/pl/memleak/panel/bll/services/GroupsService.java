@@ -20,4 +20,9 @@ public class GroupsService implements IGroupsService {
     public List<Group> getAllGroups() {
         return ldapDao.getAllGroups();
     }
+
+    @Override
+    public void deleteGroup(String groupname) {
+        ldapDao.deleteGroup(groupname);
+    }
 }
