@@ -1,9 +1,8 @@
 package pl.memleak.panel.presentation.controllers;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.services.IGroupsService;
 
@@ -25,5 +24,11 @@ public class GroupsController {
     @RequestMapping(method = RequestMethod.GET, value = "")
     public List<Group> getUsers(){
         return groupsService.getAllGroups();
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void createUser(@RequestBody Group group) {
+        groupsService.createGroup(group);
     }
 }
