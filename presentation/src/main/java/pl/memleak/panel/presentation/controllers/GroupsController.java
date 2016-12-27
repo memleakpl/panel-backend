@@ -28,6 +28,12 @@ public class GroupsController {
         return groupsService.getAllGroups();
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = "")
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void createUser(@RequestBody Group group) {
+        groupsService.createGroup(group);
+    }
+
     @RequestMapping(method = RequestMethod.DELETE, value = "/{groupname}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteGroup(@PathVariable String groupname){

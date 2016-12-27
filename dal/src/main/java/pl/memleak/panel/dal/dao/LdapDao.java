@@ -30,22 +30,34 @@ public class LdapDao implements ILdapDao {
         this.ldapConfig = ldapConfig;
     }
 
+    @Override
     public User getUser(String username) {
         return getUser(ldapConfig.getDefaultUserBaseDn(), username);
     }
 
+    @Override
     public User getUser(String baseDn, String username) {
-        SearchFilter userFilter = new SearchFilter(ldapConfig.getUidFilter());
-        userFilter.setParameter("uid", username);
-        LdapUser ldapUser = query(baseDn, userFilter, LdapUser.class).stream()
-                .findFirst().orElseThrow(() -> new RuntimeException("User " + username + " was not found"));
+        LdapUser ldapUser = getRawUser(baseDn, username);
         return UserMapper.toUser(ldapUser);
     }
 
+    private LdapUser getRawUser(String username) {
+        return getRawUser(ldapConfig.getDefaultUserBaseDn(), username);
+    }
+
+    private LdapUser getRawUser(String baseDn, String username) {
+        SearchFilter userFilter = new SearchFilter(ldapConfig.getUidFilter());
+        userFilter.setParameter("uid", username);
+        return query(baseDn, userFilter, LdapUser.class).stream()
+                .findFirst().orElseThrow(() -> new RuntimeException("User " + username + " was not found"));
+    }
+
+    @Override
     public List<User> getAllUsers() {
         return getAllUsers(ldapConfig.getDefaultUserBaseDn());
     }
 
+    @Override
     public List<User> getAllUsers(String baseDn) {
         SearchFilter userFilter = new SearchFilter(ldapConfig.getAllUsersFilter());
         List<LdapUser> ldapUsers = query(baseDn, userFilter, LdapUser.class);
@@ -68,19 +80,20 @@ public class LdapDao implements ILdapDao {
         DefaultLdapEntryMapper<LdapUser> mapper = new DefaultLdapEntryMapper<>();
         LdapEntry ldapEntry = mapper.map(ldapUser);
 
-        Connection connection = null;
-        try {
-            connection = connectionFactory.getConnection();
-            connection.open();
+        createEntry(ldapEntry);
 
-            AddOperation add = new AddOperation(connection);
-            add.execute(new AddRequest(ldapEntry.getDn(), ldapEntry.getAttributes()));
-        } catch (LdapException e) {
-            throw new RuntimeException("Unable to execute LDAP add command", e);
-        } finally {
-            if (connection != null) connection.close();
-        }
+    }
 
+    @Override
+    public void createGroup(Group group) {
+        LdapGroup ldapGroup = GroupMapper.toLdapGroup(
+                group, this.getRawUser(group.getOwner()),
+                ldapConfig.getDefaultGroupBaseDn());
+
+        DefaultLdapEntryMapper<LdapGroup> mapper = new DefaultLdapEntryMapper<>();
+        LdapEntry ldapEntry = mapper.map(ldapGroup);
+
+        createEntry(ldapEntry);
     }
 
     @Override
@@ -157,6 +170,21 @@ public class LdapDao implements ILdapDao {
             throw new RuntimeException("Cannot send query to ldap", e);
         }
 
+    }
+
+    private void createEntry(LdapEntry ldapEntry) {
+        Connection connection = null;
+        try {
+            connection = connectionFactory.getConnection();
+            connection.open();
+
+            AddOperation add = new AddOperation(connection);
+            add.execute(new AddRequest(ldapEntry.getDn(), ldapEntry.getAttributes()));
+        } catch (LdapException e) {
+            throw new RuntimeException("Unable to execute LDAP add command", e);
+        } finally {
+            if (connection != null) connection.close();
+        }
     }
 
     private <T> T mapEntry(DefaultLdapEntryMapper<T> mapper, LdapEntry entry, Class<T> targetClass) {
