@@ -41,6 +41,7 @@ public class UsersController {
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{username}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable String username) {
         usersService.deleteUser(username);
     }
