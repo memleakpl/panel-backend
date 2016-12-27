@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.memleak.panel.bll.dto.Group;
+import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
 import pl.memleak.panel.bll.services.IGroupsService;
+import pl.memleak.panel.presentation.exceptions.NotFoundException;
 
 import java.util.List;
 
@@ -22,7 +24,7 @@ public class GroupsController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "")
-    public List<Group> getUsers(){
+    public List<Group> getGroups(){
         return groupsService.getAllGroups();
     }
 
@@ -30,5 +32,15 @@ public class GroupsController {
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
     public void createUser(@RequestBody Group group) {
         groupsService.createGroup(group);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{groupname}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteGroup(@PathVariable String groupname){
+        try {
+            groupsService.deleteGroup(groupname);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        }
     }
 }

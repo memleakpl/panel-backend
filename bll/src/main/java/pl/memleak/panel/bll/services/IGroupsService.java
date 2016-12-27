@@ -11,4 +11,5 @@ public interface IGroupsService {
     List<Group> getAllGroups();
 
     void createGroup(Group group);
+    void deleteGroup(String groupname);
 }
