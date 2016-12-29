@@ -85,13 +85,6 @@ public class UsersService implements IUsersService {
 
     @Override
     public void editUser(User user, String username) {
-
-        ldapDao.editUser(user, username);
-
-        // TODO implement proper edition
-/*        User tmpUser = getUser(username);
-        tmpUser.setEmail(user.getEmail());
-        tmpUser.setFirstName(user.getFirstName());
-        tmpUser.setLastName(user.getLastName());*/
+            ldapDao.editUser(user, username);
     }
 }

@@ -96,18 +96,12 @@ public class LdapDao implements ILdapDao {
         createEntry(ldapEntry);
     }
 
-
     @Override
     public void editUser(User user, String username) {
 
-        User oldUser = this.getUser(username);
-
-        //default uid filter instead of default User Base dn ????
-        LdapUser ldapOldUser = UserMapper.toLdapUser(oldUser, "idunno" , ldapConfig.getDefaultUserBaseDn());
-        DefaultLdapEntryMapper<LdapUser> mapper = new DefaultLdapEntryMapper<>();
-        LdapEntry ldapEntry = mapper.map(ldapOldUser);
-
-        LdapUser ldapUser = UserMapper.toLdapUser(user, "idunno", ldapConfig.getDefaultUserBaseDn());
+        User oldUser = getUser(username);
+        LdapUser ldapOldUser = getRawUser(username);
+        LdapUser ldapUser = UserMapper.toLdapUser(user, "memleak.pl", ldapConfig.getDefaultUserBaseDn());
 
         Connection connection = null;
         if(!oldUser.equals(user))
@@ -115,44 +109,9 @@ public class LdapDao implements ILdapDao {
                 connection = connectionFactory.getConnection();
                 connection.open();
 
-                List<AttributeModification> modsList = new ArrayList<>();
+                ModifyRequest modifyRequest = new ModifyRequest(ldapOldUser.getDistinguishedName(),
+                        createModificationsArray(oldUser, user, ldapUser));
 
-                if( !user.getEmail().equals(oldUser.getEmail())){
-                    AttributeModification am = new AttributeModification(AttributeModificationType.REPLACE,
-                            new LdapAttribute("mail", ldapUser.getEmail()));
-
-                    modsList.add(am);
-                }
-
-                if( !user.getFirstName().equals(oldUser.getFirstName())){
-                    AttributeModification am2 = new AttributeModification(AttributeModificationType.REPLACE,
-                            new LdapAttribute("givenName", ldapUser.getGivenName()));
-
-                    modsList.add(am2);
-                }
-
-                if( !user.getLastName().equals(oldUser.getLastName())){
-                    AttributeModification am3 = new AttributeModification(AttributeModificationType.REPLACE,
-                            new LdapAttribute("sn", ldapUser.getSn()));
-                    modsList.add(am3);
-                }
-
-                if(!user.getLastName().equals(oldUser.getLastName()) ||
-                        !user.getFirstName().equals(oldUser.getFirstName())){
-
-                    AttributeModification am4 = new AttributeModification(AttributeModificationType.REPLACE,
-                            new LdapAttribute("cn", ldapUser.getCn()));
-                    AttributeModification am5 = new AttributeModification(AttributeModificationType.REPLACE,
-                            new LdapAttribute("displayName", ldapUser.getDisplayName()));
-
-                    modsList.add(am4);
-                    modsList.add(am5);
-                }
-
-                AttributeModification[] adds = new AttributeModification[modsList.size()];
-                adds = modsList.toArray(adds);
-
-                ModifyRequest modifyRequest = new ModifyRequest(ldapEntry.getDn(), adds);
                 ModifyOperation modify = new ModifyOperation(connection);
                 modify.execute(modifyRequest);
             } catch (LdapException e){
@@ -162,9 +121,6 @@ public class LdapDao implements ILdapDao {
             }
     }
 
-    // TODO zglos buga z filtrem.
-    // TODO zglos buga z formatka - po wyjsciu z formatki edycji bez wprowadzenia zmian, zostaje dana rzecz
-    // dla kolejnych wpisana domyslnie.
     @Override
     public void deleteUser(String username) {
         LdapUser toDelete = getRawUser(username);
@@ -255,5 +211,44 @@ public class LdapDao implements ILdapDao {
         }
         mapper.map(entry, object);
         return object;
+    }
+
+    private AttributeModification[] createModificationsArray(User oldUser, User newUser, LdapUser ldapUser){
+
+        List<AttributeModification> modsList = new ArrayList<>();
+
+        if( !newUser.getEmail().equals(oldUser.getEmail())){
+            AttributeModification am = new AttributeModification(AttributeModificationType.REPLACE,
+                    new LdapAttribute("mail", ldapUser.getEmail()));
+
+            modsList.add(am);
+        }
+
+        if( !newUser.getFirstName().equals(oldUser.getFirstName())){
+            AttributeModification am2 = new AttributeModification(AttributeModificationType.REPLACE,
+                    new LdapAttribute("givenName", ldapUser.getGivenName()));
+
+            modsList.add(am2);
+        }
+
+        if( !newUser.getLastName().equals(oldUser.getLastName())){
+            AttributeModification am3 = new AttributeModification(AttributeModificationType.REPLACE,
+                    new LdapAttribute("sn", ldapUser.getSn()));
+            modsList.add(am3);
+        }
+
+        if(!newUser.getLastName().equals(oldUser.getLastName()) ||
+                !newUser.getFirstName().equals(oldUser.getFirstName())){
+
+            AttributeModification am4 = new AttributeModification(AttributeModificationType.REPLACE,
+                    new LdapAttribute("cn", ldapUser.getCn()));
+            AttributeModification am5 = new AttributeModification(AttributeModificationType.REPLACE,
+                    new LdapAttribute("displayName", ldapUser.getDisplayName()));
+
+            modsList.add(am4);
+            modsList.add(am5);
+        }
+
+        return modsList.stream().toArray(AttributeModification[]::new);
     }
 }
