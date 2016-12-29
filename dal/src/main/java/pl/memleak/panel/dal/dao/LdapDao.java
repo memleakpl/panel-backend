@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 public class LdapDao implements ILdapDao {
 
-    private static final String DELETE_USER_REQUEST_FORMAT = "uid=%s,%s";
     private final ConnectionFactory connectionFactory;
     private final LdapConfig ldapConfig;
 
