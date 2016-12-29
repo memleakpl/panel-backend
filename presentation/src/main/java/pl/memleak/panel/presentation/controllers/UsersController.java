@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.memleak.panel.bll.dto.ChangePasswordRequest;
 import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.bll.services.IUsersService;
+import pl.memleak.panel.presentation.exceptions.UnauthorizedException;
 
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class UsersController {
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{username}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable String username) {
         usersService.deleteUser(username);
     }

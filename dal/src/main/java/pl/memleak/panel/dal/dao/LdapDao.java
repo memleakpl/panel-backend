@@ -12,6 +12,7 @@ import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.dal.configuration.LdapConfig;
 import pl.memleak.panel.dal.dto.LdapGroup;
 import pl.memleak.panel.dal.dto.LdapUser;
+import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
 import pl.memleak.panel.dal.mapper.GroupMapper;
 import pl.memleak.panel.dal.mapper.UserMapper;
 
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
 
 public class LdapDao implements ILdapDao {
 
-    private static final String DELETE_USER_REQUEST_FORMAT = "uid=%s,%s";
     private final ConnectionFactory connectionFactory;
     private final LdapConfig ldapConfig;
 
@@ -30,22 +30,34 @@ public class LdapDao implements ILdapDao {
         this.ldapConfig = ldapConfig;
     }
 
+    @Override
     public User getUser(String username) {
         return getUser(ldapConfig.getDefaultUserBaseDn(), username);
     }
 
+    @Override
     public User getUser(String baseDn, String username) {
-        SearchFilter userFilter = new SearchFilter(ldapConfig.getUidFilter());
-        userFilter.setParameter("uid", username);
-        LdapUser ldapUser = query(baseDn, userFilter, LdapUser.class).stream()
-                .findFirst().orElseThrow(() -> new RuntimeException("User " + username + " was not found"));
+        LdapUser ldapUser = getRawUser(baseDn, username);
         return UserMapper.toUser(ldapUser);
     }
 
+    private LdapUser getRawUser(String username) {
+        return getRawUser(ldapConfig.getDefaultUserBaseDn(), username);
+    }
+
+    private LdapUser getRawUser(String baseDn, String username) {
+        SearchFilter userFilter = new SearchFilter(ldapConfig.getUidFilter());
+        userFilter.setParameter("uid", username);
+        return query(baseDn, userFilter, LdapUser.class).stream()
+                .findFirst().orElseThrow(() -> new RuntimeException("User " + username + " was not found"));
+    }
+
+    @Override
     public List<User> getAllUsers() {
         return getAllUsers(ldapConfig.getDefaultUserBaseDn());
     }
 
+    @Override
     public List<User> getAllUsers(String baseDn) {
         SearchFilter userFilter = new SearchFilter(ldapConfig.getAllUsersFilter());
         List<LdapUser> ldapUsers = query(baseDn, userFilter, LdapUser.class);
@@ -68,19 +80,20 @@ public class LdapDao implements ILdapDao {
         DefaultLdapEntryMapper<LdapUser> mapper = new DefaultLdapEntryMapper<>();
         LdapEntry ldapEntry = mapper.map(ldapUser);
 
-        Connection connection = null;
-        try {
-            connection = connectionFactory.getConnection();
-            connection.open();
+        createEntry(ldapEntry);
 
-            AddOperation add = new AddOperation(connection);
-            add.execute(new AddRequest(ldapEntry.getDn(), ldapEntry.getAttributes()));
-        } catch (LdapException e) {
-            throw new RuntimeException("Unable to execute LDAP add command", e);
-        } finally {
-            if (connection != null) connection.close();
-        }
+    }
 
+    @Override
+    public void createGroup(Group group) {
+        LdapGroup ldapGroup = GroupMapper.toLdapGroup(
+                group, this.getRawUser(group.getOwner()),
+                ldapConfig.getDefaultGroupBaseDn());
+
+        DefaultLdapEntryMapper<LdapGroup> mapper = new DefaultLdapEntryMapper<>();
+        LdapEntry ldapEntry = mapper.map(ldapGroup);
+
+        createEntry(ldapEntry);
     }
 
 
@@ -154,16 +167,17 @@ public class LdapDao implements ILdapDao {
     // dla kolejnych wpisana domyslnie.
     @Override
     public void deleteUser(String username) {
-        Connection conn = null;
-        try {
-            conn = connectionFactory.getConnection();
+        LdapUser toDelete = getRawUser(username);
+        deleteEntity(toDelete.getDistinguishedName());
+    }
+
+    private void deleteEntity(String dn) {
+        try(Connection conn = connectionFactory.getConnection()) {
             conn.open();
             DeleteOperation delete = new DeleteOperation(conn);
-            delete.execute(new DeleteRequest(String.format(DELETE_USER_REQUEST_FORMAT, username, ldapConfig.getDefaultUserBaseDn())));
+            delete.execute(new DeleteRequest(dn));
         } catch (LdapException e) {
             throw new RuntimeException("Unable to execute LDAP delete command", e);
-        } finally {
-            if (conn != null) conn.close();
         }
     }
 
@@ -185,6 +199,12 @@ public class LdapDao implements ILdapDao {
         }
     }
 
+    @Override
+    public void deleteGroup(String groupname) {
+        LdapGroup toDelete = getGroup(groupname);
+        deleteEntity(toDelete.getDistinguishedName());
+    }
+
     public LdapGroup getGroup(String groupname) {
         return getGroup(ldapConfig.getDefaultGroupBaseDn(), groupname);
     }
@@ -193,7 +213,7 @@ public class LdapDao implements ILdapDao {
         SearchFilter groupFilter = new SearchFilter(ldapConfig.getCnFilter());
         groupFilter.setParameter("cn", groupname);
         return query(baseDn, groupFilter, LdapGroup.class).stream()
-                .findFirst().orElseThrow(() -> new RuntimeException("Group " + groupname + " was not found"));
+                .findFirst().orElseThrow(() -> new EntityNotFoundException("Group " + groupname + " was not found"));
     }
 
     private <T> List<T> query(String baseDn, SearchFilter filter, Class<T> targetClass) {
@@ -209,6 +229,21 @@ public class LdapDao implements ILdapDao {
             throw new RuntimeException("Cannot send query to ldap", e);
         }
 
+    }
+
+    private void createEntry(LdapEntry ldapEntry) {
+        Connection connection = null;
+        try {
+            connection = connectionFactory.getConnection();
+            connection.open();
+
+            AddOperation add = new AddOperation(connection);
+            add.execute(new AddRequest(ldapEntry.getDn(), ldapEntry.getAttributes()));
+        } catch (LdapException e) {
+            throw new RuntimeException("Unable to execute LDAP add command", e);
+        } finally {
+            if (connection != null) connection.close();
+        }
     }
 
     private <T> T mapEntry(DefaultLdapEntryMapper<T> mapper, LdapEntry entry, Class<T> targetClass) {

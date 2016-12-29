@@ -3,6 +3,7 @@ package pl.memleak.panel.dal.dto;
 import org.ldaptive.beans.Attribute;
 import org.ldaptive.beans.Entry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,7 +16,8 @@ import java.util.List;
                 @Attribute(name = "cn", property = "name"),
                 @Attribute(name = "member", property = "members"),
                 @Attribute(name = "owner", property = "owner"),
-                @Attribute(name = "description", property = "description")
+                @Attribute(name = "description", property = "description"),
+                @Attribute(name = "objectClass", values = {"groupOfNames"})
         })
 public class LdapGroup {
     private String distinguishedName;
@@ -23,6 +25,18 @@ public class LdapGroup {
     private List<String> members;
     private String owner;
     private String description;
+
+    public LdapGroup() {
+    }
+
+    public LdapGroup(String distinguishedName, String name, String owner, String description) {
+        this.distinguishedName = distinguishedName;
+        this.name = name;
+        this.members = new ArrayList<>();
+        this.members.add(owner);
+        this.owner = owner;
+        this.description = description;
+    }
 
     public String getOwner() {
         return owner;

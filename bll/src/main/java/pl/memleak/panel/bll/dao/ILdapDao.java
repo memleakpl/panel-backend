@@ -19,6 +19,8 @@ public interface ILdapDao {
 
     void createUser(User user, String realm);
 
+    void createGroup(Group group);
+
     void deleteUser(String username);
 
     // TODO change to LdapUser
@@ -29,4 +31,6 @@ public interface ILdapDao {
     List<Group> getAllGroups(String baseDn);
 
     boolean authenticate(String username, String password);
+
+    void deleteGroup(String groupname);
 }
