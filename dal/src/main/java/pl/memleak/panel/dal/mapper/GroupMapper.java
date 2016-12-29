@@ -15,6 +15,8 @@ public class GroupMapper {
     private static final String GROUP_DN_FORMAT = "cn=%s,%s";
 
     private static String getUid(String dn){
+        if(dn == null) return null;
+
         try {
             LdapName name = new LdapName(dn);
             String rdn = name.get(name.size() - 1);
