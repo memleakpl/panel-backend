@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 public class LdapDao implements ILdapDao {
 
-    private static final String DELETE_USER_REQUEST_FORMAT = "uid=%s,%s";
     private final ConnectionFactory connectionFactory;
     private final LdapConfig ldapConfig;
 
@@ -98,16 +97,17 @@ public class LdapDao implements ILdapDao {
 
     @Override
     public void deleteUser(String username) {
-        Connection conn = null;
-        try {
-            conn = connectionFactory.getConnection();
+        LdapUser toDelete = getRawUser(username);
+        deleteEntity(toDelete.getDistinguishedName());
+    }
+
+    private void deleteEntity(String dn) {
+        try(Connection conn = connectionFactory.getConnection()) {
             conn.open();
             DeleteOperation delete = new DeleteOperation(conn);
-            delete.execute(new DeleteRequest(String.format(DELETE_USER_REQUEST_FORMAT, username, ldapConfig.getDefaultUserBaseDn())));
+            delete.execute(new DeleteRequest(dn));
         } catch (LdapException e) {
             throw new RuntimeException("Unable to execute LDAP delete command", e);
-        } finally {
-            if (conn != null) conn.close();
         }
     }
 
@@ -132,18 +132,7 @@ public class LdapDao implements ILdapDao {
     @Override
     public void deleteGroup(String groupname) {
         LdapGroup toDelete = getGroup(groupname);
-
-        Connection conn = null;
-        try {
-            conn = connectionFactory.getConnection();
-            conn.open();
-            DeleteOperation delete = new DeleteOperation(conn);
-            delete.execute(new DeleteRequest(toDelete.getDistinguishedName()));
-        } catch (LdapException e) {
-            throw new RuntimeException("Unable to execute LDAP delete command", e);
-        } finally {
-            if (conn != null) conn.close();
-        }
+        deleteEntity(toDelete.getDistinguishedName());
     }
 
     public LdapGroup getGroup(String groupname) {
