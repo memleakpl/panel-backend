@@ -18,4 +18,6 @@ public interface IUsersService {
     boolean authenticate(String username, String password);
 
     void changePassword(String username, String password);
+
+    void editUser(User user, String username);
 }

@@ -21,6 +21,9 @@ public interface ILdapDao {
 
     void deleteUser(String username);
 
+    // TODO change to LdapUser
+    void editUser(User user, String username);
+
     List<Group> getAllGroups();
 
     List<Group> getAllGroups(String baseDn);

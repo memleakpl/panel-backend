@@ -60,4 +60,16 @@ public class UsersController {
 
         usersService.changePassword(username, changePasswordRequest.getNewPassword());
     }
+
+    @RequestMapping(method = RequestMethod.PUT, value="/{username}")
+    public void editUser(@RequestBody User user, @PathVariable String username){
+
+        //TODO implement editUser properly - check what is ldapUser
+        if (!user.getUsername().equals(username)){
+            throw new RuntimeException("Username doesn't match");
+        }
+
+        usersService.editUser(user, username);
+
+    }
 }
