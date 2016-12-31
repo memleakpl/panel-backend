@@ -2,6 +2,10 @@ package pl.memleak.panel.dal.dto;
 
 import org.ldaptive.beans.Attribute;
 import org.ldaptive.beans.Entry;
+
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Created by Kamil on 19.11.2016.
  */
@@ -14,6 +18,7 @@ attributes = {
         @Attribute(name = "displayName", property = "displayName"),
         @Attribute(name = "mail", property = "email"),
         @Attribute(name = "userPassword", property = "userPassword"),
+        @Attribute(name = "memberOf", property = "memberOf"),
         @Attribute(name = "objectClass", values = {"organizationalPerson", "inetOrgPerson"})
 })
 public class LdapUser {
@@ -26,6 +31,7 @@ public class LdapUser {
     private String email;
     private String displayName;
     private String userPassword;
+    private List<String> memberOf = new LinkedList<>();
 
     public String getGivenName() {
         return givenName;
@@ -89,5 +95,13 @@ public class LdapUser {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public List<String> getMemberOf() {
+        return new LinkedList<>(memberOf);
+    }
+
+    public void setMemberOf(List<String> memberOf) {
+        this.memberOf = memberOf;
     }
 }

@@ -30,4 +30,8 @@ public interface ILdapDao {
     boolean authenticate(String username, String password);
 
     void deleteGroup(String groupname);
+
+    void addToGroup(String groupname, String username);
+
+    void removeFromGroup(String groupname, String username);
 }

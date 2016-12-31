@@ -4,6 +4,7 @@ import org.ldaptive.beans.Attribute;
 import org.ldaptive.beans.Entry;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -71,7 +72,7 @@ public class LdapGroup {
     }
 
     public List<String> getMembers() {
-        return members;
+        return new LinkedList<>(members);
     }
 
     public void setMembers(List<String> members) {

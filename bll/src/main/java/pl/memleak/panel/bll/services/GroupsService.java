@@ -30,4 +30,14 @@ public class GroupsService implements IGroupsService {
     public void deleteGroup(String groupname) {
         ldapDao.deleteGroup(groupname);
     }
+
+    @Override
+    public void addToGroup(String groupname, String username) {
+        ldapDao.addToGroup(groupname, username);
+    }
+
+    @Override
+    public void removeFromGroup(String groupname, String username) {
+        ldapDao.removeFromGroup(groupname, username);
+    }
 }
