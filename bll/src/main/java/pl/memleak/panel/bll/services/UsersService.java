@@ -84,7 +84,7 @@ public class UsersService implements IUsersService {
     }
 
     @Override
-    public void editUser(User user, String username) {
-            ldapDao.editUser(user, username);
+    public void editUser(User user) {
+            ldapDao.editUser(user);
     }
 }

@@ -23,7 +23,7 @@ public interface ILdapDao {
 
     void deleteUser(String username);
 
-    void editUser(User user, String username);
+    void editUser(User user);
 
     List<Group> getAllGroups();
 

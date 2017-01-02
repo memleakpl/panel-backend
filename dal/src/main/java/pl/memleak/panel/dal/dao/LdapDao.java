@@ -97,28 +97,26 @@ public class LdapDao implements ILdapDao {
     }
 
     @Override
-    public void editUser(User user, String username) {
+    public void editUser(User user) {
+        LdapUser oldLdapUser = getRawUser(user.getUsername());
+        LdapUser newLdapUser = UserMapper.ldapUserUpdate(user, oldLdapUser);
 
-        User oldUser = getUser(username);
-        LdapUser ldapOldUser = getRawUser(username);
-        LdapUser ldapUser = UserMapper.toLdapUser(user, "memleak.pl", ldapConfig.getDefaultUserBaseDn());
+        AttributeModification[] attributeModifications = createModificationsArray(newLdapUser, oldLdapUser);
 
-        Connection connection = null;
-        if(!oldUser.equals(user))
-            try{
-                connection = connectionFactory.getConnection();
+        if (attributeModifications.length != 0) {
+            try (Connection connection = connectionFactory.getConnection()) {
                 connection.open();
 
-                ModifyRequest modifyRequest = new ModifyRequest(ldapOldUser.getDistinguishedName(),
-                        createModificationsArray(oldUser, user, ldapUser));
+                ModifyRequest modifyRequest = new ModifyRequest(newLdapUser.getDistinguishedName(),
+                        attributeModifications);
 
                 ModifyOperation modify = new ModifyOperation(connection);
                 modify.execute(modifyRequest);
-            } catch (LdapException e){
+            } catch (LdapException e) {
                 throw new RuntimeException("Unable to execute LDAP modify command", e);
-            } finally {
-                if( connection != null) connection.close();
             }
+        }
+
     }
 
     @Override
@@ -213,42 +211,32 @@ public class LdapDao implements ILdapDao {
         return object;
     }
 
-    private AttributeModification[] createModificationsArray(User oldUser, User newUser, LdapUser ldapUser){
+    private AttributeModification createAttributeModification(String attribute, String value){
+        return new AttributeModification(AttributeModificationType.REPLACE,
+                new LdapAttribute(attribute, value));
+    }
+
+    private AttributeModification[] createModificationsArray(LdapUser newLdapUser, LdapUser oldLdapUser){
 
         List<AttributeModification> modsList = new ArrayList<>();
 
-        if( !newUser.getEmail().equals(oldUser.getEmail())){
-            AttributeModification am = new AttributeModification(AttributeModificationType.REPLACE,
-                    new LdapAttribute("mail", ldapUser.getEmail()));
-
-            modsList.add(am);
+        if( !newLdapUser.getEmail().equals(oldLdapUser.getEmail())){
+            modsList.add(createAttributeModification("mail", newLdapUser.getEmail()));
         }
 
-        if( !newUser.getFirstName().equals(oldUser.getFirstName())){
-            AttributeModification am2 = new AttributeModification(AttributeModificationType.REPLACE,
-                    new LdapAttribute("givenName", ldapUser.getGivenName()));
-
-            modsList.add(am2);
+        if( !newLdapUser.getGivenName().equals(oldLdapUser.getGivenName())){
+            modsList.add(createAttributeModification("givenName", newLdapUser.getGivenName()));
         }
 
-        if( !newUser.getLastName().equals(oldUser.getLastName())){
-            AttributeModification am3 = new AttributeModification(AttributeModificationType.REPLACE,
-                    new LdapAttribute("sn", ldapUser.getSn()));
-            modsList.add(am3);
+        if( !newLdapUser.getSn().equals(oldLdapUser.getSn())){
+            modsList.add(createAttributeModification("sn", newLdapUser.getSn()));
         }
 
-        if(!newUser.getLastName().equals(oldUser.getLastName()) ||
-                !newUser.getFirstName().equals(oldUser.getFirstName())){
-
-            AttributeModification am4 = new AttributeModification(AttributeModificationType.REPLACE,
-                    new LdapAttribute("cn", ldapUser.getCn()));
-            AttributeModification am5 = new AttributeModification(AttributeModificationType.REPLACE,
-                    new LdapAttribute("displayName", ldapUser.getDisplayName()));
-
-            modsList.add(am4);
-            modsList.add(am5);
+        if( !newLdapUser.getCn().equals(oldLdapUser.getCn())){
+            modsList.add(createAttributeModification("cn", newLdapUser.getCn()));
+            modsList.add(createAttributeModification("displayName", newLdapUser.getDisplayName()));
         }
 
-        return modsList.stream().toArray(AttributeModification[]::new);
+        return modsList.toArray(new AttributeModification[modsList.size()]);
     }
 }

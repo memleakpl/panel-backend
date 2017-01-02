@@ -19,5 +19,5 @@ public interface IUsersService {
 
     void changePassword(String username, String password);
 
-    void editUser(User user, String username);
+    void editUser(User user);
 }

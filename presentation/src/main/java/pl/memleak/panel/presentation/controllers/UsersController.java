@@ -65,6 +65,9 @@ public class UsersController {
 
     @RequestMapping(method = RequestMethod.PUT, value="/{username}")
     public void editUser(@RequestBody User user, @PathVariable String username){
-            usersService.editUser(user, username);
+
+        if (user.getUsername().equals(username)) {
+            usersService.editUser(user);
+        }
     }
 }

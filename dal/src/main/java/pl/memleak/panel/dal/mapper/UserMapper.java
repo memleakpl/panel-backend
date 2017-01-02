@@ -35,4 +35,20 @@ public class UserMapper {
         return ldapUser;
     }
 
+    public static LdapUser ldapUserUpdate(User newUser, LdapUser oldUser){
+        LdapUser newLdapUser = new LdapUser();
+        final String fullName = newUser.getFirstName() + " " + newUser.getLastName();
+
+        newLdapUser.setUsername(newUser.getUsername());
+        newLdapUser.setEmail(newUser.getEmail());
+        newLdapUser.setCn(fullName);
+        newLdapUser.setDisplayName(fullName);
+        newLdapUser.setGivenName(newUser.getFirstName());
+        newLdapUser.setSn(newUser.getLastName());
+        newLdapUser.setUserPassword(oldUser.getUserPassword());
+        newLdapUser.setDistinguishedName(oldUser.getDistinguishedName());
+
+        return newLdapUser;
+    }
+
 }
