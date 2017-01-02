@@ -25,13 +25,11 @@ public class UserMapper {
     }
 
     public static LdapUser toLdapUser(User user, String krbDomain, String peopleBaseDn){
-        final String fullName = user.getFirstName() + " " + user.getLastName();
-
         LdapUser ldapUser = new LdapUser();
         ldapUser.setUsername(user.getUsername());
         ldapUser.setEmail(user.getEmail());
-        ldapUser.setCn(fullName);
-        ldapUser.setDisplayName(fullName);
+        ldapUser.setCn(getFullName(user));
+        ldapUser.setDisplayName(getFullName(user));
         ldapUser.setGivenName(user.getFirstName());
         ldapUser.setSn(user.getLastName());
         ldapUser.setUserPassword(String.format(USER_PASSWORD_FORMAT, user.getUsername(), krbDomain));
@@ -53,6 +51,4 @@ public class UserMapper {
 
         return newLdapUser;
     }
-
-
 }
