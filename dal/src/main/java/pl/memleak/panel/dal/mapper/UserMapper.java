@@ -20,6 +20,10 @@ public class UserMapper {
         return user;
     }
 
+    private static String getFullName(User user){
+        return user.getFirstName() + " " + user.getLastName();
+    }
+
     public static LdapUser toLdapUser(User user, String krbDomain, String peopleBaseDn){
         final String fullName = user.getFirstName() + " " + user.getLastName();
 
@@ -37,12 +41,11 @@ public class UserMapper {
 
     public static LdapUser ldapUserUpdate(User newUser, LdapUser oldUser){
         LdapUser newLdapUser = new LdapUser();
-        final String fullName = newUser.getFirstName() + " " + newUser.getLastName();
 
         newLdapUser.setUsername(newUser.getUsername());
         newLdapUser.setEmail(newUser.getEmail());
-        newLdapUser.setCn(fullName);
-        newLdapUser.setDisplayName(fullName);
+        newLdapUser.setCn(getFullName(newUser));
+        newLdapUser.setDisplayName(getFullName(newUser));
         newLdapUser.setGivenName(newUser.getFirstName());
         newLdapUser.setSn(newUser.getLastName());
         newLdapUser.setUserPassword(oldUser.getUserPassword());
@@ -50,5 +53,6 @@ public class UserMapper {
 
         return newLdapUser;
     }
+
 
 }

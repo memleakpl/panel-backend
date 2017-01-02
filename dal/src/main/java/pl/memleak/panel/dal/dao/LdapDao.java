@@ -103,20 +103,19 @@ public class LdapDao implements ILdapDao {
 
         AttributeModification[] attributeModifications = createModificationsArray(newLdapUser, oldLdapUser);
 
-        if (attributeModifications.length != 0) {
-            try (Connection connection = connectionFactory.getConnection()) {
-                connection.open();
+        if (attributeModifications.length == 0) return;
 
-                ModifyRequest modifyRequest = new ModifyRequest(newLdapUser.getDistinguishedName(),
-                        attributeModifications);
+        try (Connection connection = connectionFactory.getConnection()) {
+            connection.open();
 
-                ModifyOperation modify = new ModifyOperation(connection);
-                modify.execute(modifyRequest);
-            } catch (LdapException e) {
-                throw new RuntimeException("Unable to execute LDAP modify command", e);
-            }
+            ModifyRequest modifyRequest = new ModifyRequest(newLdapUser.getDistinguishedName(),
+                    attributeModifications);
+
+            ModifyOperation modify = new ModifyOperation(connection);
+            modify.execute(modifyRequest);
+        } catch (LdapException e) {
+            throw new RuntimeException("Unable to execute LDAP modify command", e);
         }
-
     }
 
     @Override
@@ -234,6 +233,9 @@ public class LdapDao implements ILdapDao {
 
         if( !newLdapUser.getCn().equals(oldLdapUser.getCn())){
             modsList.add(createAttributeModification("cn", newLdapUser.getCn()));
+        }
+
+        if( !newLdapUser.getDisplayName().equals(oldLdapUser.getDisplayName())){
             modsList.add(createAttributeModification("displayName", newLdapUser.getDisplayName()));
         }
 
