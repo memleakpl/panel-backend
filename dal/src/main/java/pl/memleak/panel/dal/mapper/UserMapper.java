@@ -20,14 +20,16 @@ public class UserMapper {
         return user;
     }
 
-    public static LdapUser toLdapUser(User user, String krbDomain, String peopleBaseDn){
-        final String fullName = user.getFirstName() + " " + user.getLastName();
+    private static String getFullName(User user){
+        return user.getFirstName() + " " + user.getLastName();
+    }
 
+    public static LdapUser toLdapUser(User user, String krbDomain, String peopleBaseDn){
         LdapUser ldapUser = new LdapUser();
         ldapUser.setUsername(user.getUsername());
         ldapUser.setEmail(user.getEmail());
-        ldapUser.setCn(fullName);
-        ldapUser.setDisplayName(fullName);
+        ldapUser.setCn(getFullName(user));
+        ldapUser.setDisplayName(getFullName(user));
         ldapUser.setGivenName(user.getFirstName());
         ldapUser.setSn(user.getLastName());
         ldapUser.setUserPassword(String.format(USER_PASSWORD_FORMAT, user.getUsername(), krbDomain));
@@ -35,4 +37,18 @@ public class UserMapper {
         return ldapUser;
     }
 
+    public static LdapUser ldapUserUpdate(User newUser, LdapUser oldUser){
+        LdapUser newLdapUser = new LdapUser();
+
+        newLdapUser.setUsername(newUser.getUsername());
+        newLdapUser.setEmail(newUser.getEmail());
+        newLdapUser.setCn(getFullName(newUser));
+        newLdapUser.setDisplayName(getFullName(newUser));
+        newLdapUser.setGivenName(newUser.getFirstName());
+        newLdapUser.setSn(newUser.getLastName());
+        newLdapUser.setUserPassword(oldUser.getUserPassword());
+        newLdapUser.setDistinguishedName(oldUser.getDistinguishedName());
+
+        return newLdapUser;
+    }
 }

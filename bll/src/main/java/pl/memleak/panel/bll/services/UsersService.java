@@ -82,4 +82,9 @@ public class UsersService implements IUsersService {
         // TODO implement password generation
         return "password"; // https://www.xkcd.com/221/
     }
+
+    @Override
+    public void editUser(User user) {
+            ldapDao.editUser(user);
+    }
 }

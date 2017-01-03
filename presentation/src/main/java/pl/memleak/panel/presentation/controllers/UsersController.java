@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.memleak.panel.bll.dto.ChangePasswordRequest;
 import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.bll.services.IUsersService;
+import pl.memleak.panel.presentation.exceptions.BadRequestException;
 import pl.memleak.panel.presentation.exceptions.UnauthorizedException;
 
 import java.util.List;
@@ -61,5 +62,15 @@ public class UsersController {
             throw new UnauthorizedException("Invalid credentials");
 
         usersService.changePassword(username, changePasswordRequest.getNewPassword());
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, value="/{username}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void editUser(@RequestBody User user, @PathVariable String username) {
+        if (!user.getUsername().equals(username)) {
+            throw new BadRequestException("Username doesn't match");
+        }
+
+        usersService.editUser(user);
     }
 }

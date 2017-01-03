@@ -16,6 +16,7 @@ import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
 import pl.memleak.panel.dal.mapper.GroupMapper;
 import pl.memleak.panel.dal.mapper.UserMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -93,6 +94,28 @@ public class LdapDao implements ILdapDao {
         LdapEntry ldapEntry = mapper.map(ldapGroup);
 
         createEntry(ldapEntry);
+    }
+
+    @Override
+    public void editUser(User user) {
+        LdapUser oldLdapUser = getRawUser(user.getUsername());
+        LdapUser newLdapUser = UserMapper.ldapUserUpdate(user, oldLdapUser);
+
+        AttributeModification[] attributeModifications = createModificationsArray(newLdapUser, oldLdapUser);
+
+        if (attributeModifications.length == 0) return;
+
+        try (Connection connection = connectionFactory.getConnection()) {
+            connection.open();
+
+            ModifyRequest modifyRequest = new ModifyRequest(newLdapUser.getDistinguishedName(),
+                    attributeModifications);
+
+            ModifyOperation modify = new ModifyOperation(connection);
+            modify.execute(modifyRequest);
+        } catch (LdapException e) {
+            throw new RuntimeException("Unable to execute LDAP modify command", e);
+        }
     }
 
     @Override
@@ -185,5 +208,37 @@ public class LdapDao implements ILdapDao {
         }
         mapper.map(entry, object);
         return object;
+    }
+
+    private AttributeModification createAttributeModification(String attribute, String value){
+        return new AttributeModification(AttributeModificationType.REPLACE,
+                new LdapAttribute(attribute, value));
+    }
+
+    private AttributeModification[] createModificationsArray(LdapUser newLdapUser, LdapUser oldLdapUser){
+
+        List<AttributeModification> modsList = new ArrayList<>();
+
+        if( !newLdapUser.getEmail().equals(oldLdapUser.getEmail())){
+            modsList.add(createAttributeModification("mail", newLdapUser.getEmail()));
+        }
+
+        if( !newLdapUser.getGivenName().equals(oldLdapUser.getGivenName())){
+            modsList.add(createAttributeModification("givenName", newLdapUser.getGivenName()));
+        }
+
+        if( !newLdapUser.getSn().equals(oldLdapUser.getSn())){
+            modsList.add(createAttributeModification("sn", newLdapUser.getSn()));
+        }
+
+        if( !newLdapUser.getCn().equals(oldLdapUser.getCn())){
+            modsList.add(createAttributeModification("cn", newLdapUser.getCn()));
+        }
+
+        if( !newLdapUser.getDisplayName().equals(oldLdapUser.getDisplayName())){
+            modsList.add(createAttributeModification("displayName", newLdapUser.getDisplayName()));
+        }
+
+        return modsList.toArray(new AttributeModification[modsList.size()]);
     }
 }
