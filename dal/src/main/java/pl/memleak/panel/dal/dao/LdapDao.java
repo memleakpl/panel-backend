@@ -9,6 +9,7 @@ import org.ldaptive.beans.reflect.DefaultLdapEntryMapper;
 import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.dto.User;
+import pl.memleak.panel.bll.exceptions.GroupModifyException;
 import pl.memleak.panel.dal.configuration.LdapConfig;
 import pl.memleak.panel.dal.dto.LdapGroup;
 import pl.memleak.panel.dal.dto.LdapUser;
@@ -153,7 +154,7 @@ public class LdapDao implements ILdapDao {
             ModifyOperation modifyOperation = new ModifyOperation(conn);
             modifyOperation.execute(modifyRequest);
         } catch (LdapException e) {
-            throw new RuntimeException("Cannot add user to group", e);
+            throw new GroupModifyException("Cannot add user to group", e);
         }
     }
 
@@ -161,6 +162,7 @@ public class LdapDao implements ILdapDao {
     public void removeFromGroup(String groupname, String username) {
         LdapGroup group = getGroup(groupname);
         LdapUser user = getRawUser(username);
+
         deleteUserFromGroup(group, user);
     }
 
@@ -179,7 +181,7 @@ public class LdapDao implements ILdapDao {
                 ModifyOperation modifyOperation = new ModifyOperation(conn);
                 modifyOperation.execute(modifyRequest);
             } catch (LdapException e) {
-                throw new RuntimeException("Cannot delete user from group", e);
+                throw new GroupModifyException("Cannot delete user from group", e);
             }
         }
     }

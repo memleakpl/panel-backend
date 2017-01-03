@@ -5,7 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
+import pl.memleak.panel.bll.exceptions.GroupModifyException;
 import pl.memleak.panel.bll.services.IGroupsService;
+import pl.memleak.panel.presentation.exceptions.ModifyException;
 import pl.memleak.panel.presentation.exceptions.NotFoundException;
 
 import java.util.List;
@@ -47,12 +49,22 @@ public class GroupsController {
     @RequestMapping(method = RequestMethod.POST, value = "/{groupname}/add/{username}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addToGroup(@PathVariable String groupname, @PathVariable String username){
-        groupsService.addToGroup(groupname, username);
+        try {
+            groupsService.addToGroup(groupname, username);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        } catch (GroupModifyException e) {
+            throw new ModifyException(e);
+        }
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{groupname}/remove/{username}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeFromGroup(@PathVariable String groupname, @PathVariable String username){
-        groupsService.removeFromGroup(groupname, username);
+        try {
+            groupsService.removeFromGroup(groupname, username);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        }
     }
 }
