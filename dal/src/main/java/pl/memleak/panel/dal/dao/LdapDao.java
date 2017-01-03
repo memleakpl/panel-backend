@@ -141,21 +141,6 @@ public class LdapDao implements ILdapDao {
         LdapUser user = getRawUser(username);
 
         addUserToGroup(group, user);
-        addGroupToUser(user, group);
-    }
-
-    private void addGroupToUser(LdapUser user, LdapGroup group) {
-        try (Connection conn = connectionFactory.getConnection()){
-            conn.open();
-            AttributeModification attributeModification = new AttributeModification(
-                    AttributeModificationType.ADD,
-                    new LdapAttribute("memberOf", group.getDistinguishedName()));
-            ModifyRequest modifyRequest = new ModifyRequest(user.getDistinguishedName(), attributeModification);
-            ModifyOperation modifyOperation = new ModifyOperation(conn);
-            modifyOperation.execute(modifyRequest);
-        } catch (LdapException e) {
-            throw new RuntimeException("Cannot add group to user", e);
-        }
     }
 
     private void addUserToGroup(LdapGroup group, LdapUser user) {
@@ -177,21 +162,6 @@ public class LdapDao implements ILdapDao {
         LdapGroup group = getGroup(groupname);
         LdapUser user = getRawUser(username);
         deleteUserFromGroup(group, user);
-        deleteGroupFromUser(user, group);
-    }
-
-    private void deleteGroupFromUser(LdapUser user, LdapGroup group) {
-        try(Connection conn = connectionFactory.getConnection()){
-            conn.open();
-            AttributeModification attributeModification = new AttributeModification(
-                    AttributeModificationType.REMOVE,
-                    new LdapAttribute("memberOf", user.getDistinguishedName()));
-            ModifyRequest modifyRequest = new ModifyRequest(group.getDistinguishedName(), attributeModification);
-            ModifyOperation modifyOperation = new ModifyOperation(conn);
-            modifyOperation.execute(modifyRequest);
-        } catch (LdapException e){
-            throw new RuntimeException("Cannot delete group from user", e);
-        }
     }
 
     private void deleteUserFromGroup(LdapGroup group, LdapUser user) {
