@@ -7,8 +7,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.memleak.panel.bll.dto.ChangePasswordRequest;
 import pl.memleak.panel.bll.dto.User;
+import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
 import pl.memleak.panel.bll.services.IUsersService;
 import pl.memleak.panel.presentation.exceptions.BadRequestException;
+import pl.memleak.panel.presentation.exceptions.NotFoundException;
 import pl.memleak.panel.presentation.exceptions.UnauthorizedException;
 
 import java.util.List;
@@ -38,13 +40,21 @@ public class UsersController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/{username}")
     public User getUser(@PathVariable String username) {
-        return usersService.getUser(username);
+        try {
+            return usersService.getUser(username);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        }
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{username}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable String username) {
-        usersService.deleteUser(username);
+        try {
+            usersService.deleteUser(username);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        }
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/password")
