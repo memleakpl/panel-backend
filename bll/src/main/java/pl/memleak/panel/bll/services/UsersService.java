@@ -17,6 +17,7 @@ public class UsersService implements IUsersService {
     private IKrbDao krbDao;
     private IMailService mailService;
     private UserCreatedMailBuilder userCreatedMailBuilder;
+    private Random random = new Random();
 
     public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IMailService mailService, UserCreatedMailBuilder
             userCreatedMailBuilder) {
@@ -83,7 +84,6 @@ public class UsersService implements IUsersService {
         @SuppressWarnings("SpellCheckingInspection")
         char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()".toCharArray();
         StringBuilder sb = new StringBuilder();
-        Random random = new Random();
         for (int i = 0; i < 20; i++) {
             char c = chars[random.nextInt(chars.length)];
             sb.append(c);
