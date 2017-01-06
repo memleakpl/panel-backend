@@ -27,6 +27,7 @@ war {
 	baseName = 'panel'
 	version = '0.0.1-SNAPSHOT'
 }
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -36,8 +37,10 @@ repositories {
 	maven { url "https://repo.spring.io/milestone" }
 }
 
-
+ext['tomcat.version'] = '7.0.59'
 dependencies {
+	compile group:'org.apache.tomcat', name:'tomcat-juli', version:property('tomcat.version')
+
 	// https://mvnrepository.com/artifact/org.ldaptive/ldaptive
 	compile group: 'org.ldaptive', name: 'ldaptive', version: '1.2.0'
 	compile group: 'org.ldaptive', name: 'ldaptive-beans', version: '1.2.0'
@@ -47,7 +50,8 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-security')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
-	compile project(':bll');
-	compile project(':dal');
-	compile project(':presentation');
+	compile project(':bll')
+	compile project(':dal')
+	compile project(':presentation')
+	compile project(':infrastructure')
 }

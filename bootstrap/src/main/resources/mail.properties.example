@@ -1,0 +1,8 @@
+smtp.starttls=true
+smtp.auth=true
+smtp.hostname=smtp.memleak.pl
+smtp.port=25
+smtp.username=memleak
+smtp.password=password
+envelope.sender=panel@memleak.pl
+envelope.createUserSubject=Account created

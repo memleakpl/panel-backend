@@ -9,8 +9,15 @@ import java.util.List;
  */
 public interface IUsersService {
     List<User> getAllUsers();
+    User getUser(String username);
 
     void createUser(User user);
 
     void deleteUser(String username);
+
+    boolean authenticate(String username, String password);
+
+    void changePassword(String username, String password);
+
+    void editUser(User user);
 }

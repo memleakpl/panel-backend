@@ -24,12 +24,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 public class BackendApplication extends SpringBootServletInitializer {
 
 	private static final String HTTP_CORS_KEY = "http.cors";
-	private Environment env;
-
-	@Autowired
-	public BackendApplication(Environment env) {
-		this.env = env;
-	}
 
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
@@ -43,13 +37,14 @@ public class BackendApplication extends SpringBootServletInitializer {
 	}
 
 	@Bean
-    public WebMvcConfigurer corsConfigurer() {
+    public WebMvcConfigurer corsConfigurer(@Autowired Environment env) {
 
         return new WebMvcConfigurerAdapter() {
 
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins(env.getProperty(HTTP_CORS_KEY));
+                registry.addMapping("/**").allowedOrigins(env.getProperty(HTTP_CORS_KEY))
+						.allowedMethods("POST", "GET", "PUT", "DELETE");
             }
         };
     }

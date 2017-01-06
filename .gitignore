@@ -1,5 +1,6 @@
 .gradle
 /build/
+/out/
 !gradle/wrapper/gradle-wrapper.jar
 
 classes
@@ -25,3 +26,8 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+
+### Local configuration files ###
+hibernate.cfg.xml
+krbadmin.properties
+mail.properties

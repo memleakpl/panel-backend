@@ -9,6 +9,7 @@ import org.ldaptive.beans.Entry;
 attributes = {
         @Attribute(name = "uid", property = "username"),
         @Attribute(name = "cn", property = "cn"),
+        @Attribute(name = "givenName", property = "givenName"),
         @Attribute(name = "sn", property = "sn"),
         @Attribute(name = "displayName", property = "displayName"),
         @Attribute(name = "mail", property = "email"),
@@ -19,11 +20,20 @@ public class LdapUser {
 
     private String username;
     private String cn;
+    private String givenName;
     private String sn;
     private String distinguishedName;
     private String email;
     private String displayName;
     private String userPassword;
+
+    public String getGivenName() {
+        return givenName;
+    }
+
+    public void setGivenName(String givenName) {
+        this.givenName = givenName;
+    }
 
     public String getCn() {
         return cn;
