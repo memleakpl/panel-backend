@@ -38,14 +38,20 @@ public class AuthenticationFilter extends AbstractAuthenticationProcessingFilter
     }
 
     private LoginRequest getLoginRequest(HttpServletRequest request) {
-
+        LoginRequest loginRequest;
         try (BufferedReader reader = request.getReader()) {
-            return gson.fromJson(reader, LoginRequest.class);
+            loginRequest =  gson.fromJson(reader, LoginRequest.class);
         } catch (JsonSyntaxException ex) {
             throw new BadRequestAuthenticationException("Wrong json format", ex);
         } catch (Exception ex) {
             throw new InternalAuthenticationServiceException("", ex);
         }
+
+        if(loginRequest == null){
+            throw new BadRequestAuthenticationException("Unable to parse login request json");
+        }
+
+        return loginRequest;
     }
 
 }
