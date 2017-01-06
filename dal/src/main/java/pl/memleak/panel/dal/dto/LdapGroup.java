@@ -72,8 +72,9 @@ public class LdapGroup {
     }
 
     public List<String> getMembers() {
-        if(members == null)
-            return new LinkedList<>();
+        if(members == null) {
+            members = new LinkedList<>();
+        }
         return members;
     }
 

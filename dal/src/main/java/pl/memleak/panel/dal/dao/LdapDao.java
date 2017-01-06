@@ -144,7 +144,7 @@ public class LdapDao implements ILdapDao {
         try {
             editGroupMembership(group, user, AttributeModificationType.ADD);
         } catch (LdapException e) {
-            throw new GroupModifyException("Cannot delete user from group", e);
+            throw new GroupModifyException("Cannot add user to group", e);
         }
     }
 
