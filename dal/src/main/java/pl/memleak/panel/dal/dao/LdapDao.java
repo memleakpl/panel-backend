@@ -141,20 +141,10 @@ public class LdapDao implements ILdapDao {
         LdapGroup group = getGroup(groupname);
         LdapUser user = getRawUser(username);
 
-        addUserToGroup(group, user);
-    }
-
-    private void addUserToGroup(LdapGroup group, LdapUser user) {
-        try (Connection conn = connectionFactory.getConnection()){
-            conn.open();
-            AttributeModification attributeModification = new AttributeModification(
-                    AttributeModificationType.ADD,
-                    new LdapAttribute("member", user.getDistinguishedName()));
-            ModifyRequest modifyRequest = new ModifyRequest(group.getDistinguishedName(), attributeModification);
-            ModifyOperation modifyOperation = new ModifyOperation(conn);
-            modifyOperation.execute(modifyRequest);
+        try {
+            editGroupMembership(group, user, AttributeModificationType.ADD);
         } catch (LdapException e) {
-            throw new GroupModifyException("Cannot add user to group", e);
+            throw new GroupModifyException("Cannot delete user from group", e);
         }
     }
 
@@ -163,26 +153,29 @@ public class LdapDao implements ILdapDao {
         LdapGroup group = getGroup(groupname);
         LdapUser user = getRawUser(username);
 
-        deleteUserFromGroup(group, user);
-    }
-
-    private void deleteUserFromGroup(LdapGroup group, LdapUser user) {
         List<String> newGroupMembers = group.getMembers();
         newGroupMembers.remove(user.getDistinguishedName());
         if(newGroupMembers.isEmpty()){
             deleteEntity(group.getDistinguishedName());
-        } else {
-            try(Connection conn = connectionFactory.getConnection()) {
-                conn.open();
-                AttributeModification attributeModification = new AttributeModification(
-                        AttributeModificationType.REMOVE,
-                        new LdapAttribute("member", user.getDistinguishedName()));
-                ModifyRequest modifyRequest = new ModifyRequest(group.getDistinguishedName(), attributeModification);
-                ModifyOperation modifyOperation = new ModifyOperation(conn);
-                modifyOperation.execute(modifyRequest);
-            } catch (LdapException e) {
-                throw new GroupModifyException("Cannot delete user from group", e);
-            }
+            return;
+        }
+        try {
+            editGroupMembership(group, user, AttributeModificationType.REMOVE);
+        } catch (LdapException e) {
+            throw new GroupModifyException("Cannot delete user from group", e);
+        }
+    }
+
+    private void editGroupMembership(LdapGroup group, LdapUser user, AttributeModificationType operationType)
+            throws LdapException {
+        try(Connection conn = connectionFactory.getConnection()) {
+            conn.open();
+            AttributeModification attributeModification = new AttributeModification(
+                    operationType,
+                    new LdapAttribute("member", user.getDistinguishedName()));
+            ModifyRequest modifyRequest = new ModifyRequest(group.getDistinguishedName(), attributeModification);
+            ModifyOperation modifyOperation = new ModifyOperation(conn);
+            modifyOperation.execute(modifyRequest);
         }
     }
 

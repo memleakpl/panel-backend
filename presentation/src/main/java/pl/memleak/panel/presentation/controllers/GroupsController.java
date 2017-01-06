@@ -5,9 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
-import pl.memleak.panel.bll.exceptions.GroupModifyException;
 import pl.memleak.panel.bll.services.IGroupsService;
-import pl.memleak.panel.presentation.exceptions.ModifyException;
 import pl.memleak.panel.presentation.exceptions.NotFoundException;
 
 import java.util.List;
@@ -53,8 +51,6 @@ public class GroupsController {
             groupsService.addToGroup(groupname, username);
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e);
-        } catch (GroupModifyException e) {
-            throw new ModifyException(e);
         }
     }
 

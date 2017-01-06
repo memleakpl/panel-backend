@@ -23,7 +23,7 @@ import java.util.List;
 public class LdapGroup {
     private String distinguishedName;
     private String name;
-    private List<String> members;
+    private List<String> members = new LinkedList<>();
     private String owner;
     private String description;
 
@@ -72,7 +72,9 @@ public class LdapGroup {
     }
 
     public List<String> getMembers() {
-        return new LinkedList<>(members);
+        if(members == null)
+            return new LinkedList<>();
+        return members;
     }
 
     public void setMembers(List<String> members) {
