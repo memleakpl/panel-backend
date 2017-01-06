@@ -49,7 +49,7 @@ public class LdapDao implements ILdapDao {
         SearchFilter userFilter = new SearchFilter(ldapConfig.getUidFilter());
         userFilter.setParameter("uid", username);
         return query(baseDn, userFilter, LdapUser.class).stream()
-                .findFirst().orElseThrow(() -> new RuntimeException("User " + username + " was not found"));
+                .findFirst().orElseThrow(() -> new EntityNotFoundException("User " + username + " was not found"));
     }
 
     @Override
