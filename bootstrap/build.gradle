@@ -37,8 +37,10 @@ repositories {
 	maven { url "https://repo.spring.io/milestone" }
 }
 
-
+ext['tomcat.version'] = '7.0.59'
 dependencies {
+	compile group:'org.apache.tomcat', name:'tomcat-juli', version:property('tomcat.version')
+
 	// https://mvnrepository.com/artifact/org.ldaptive/ldaptive
 	compile group: 'org.ldaptive', name: 'ldaptive', version: '1.2.0'
 	compile group: 'org.ldaptive', name: 'ldaptive-beans', version: '1.2.0'
