@@ -7,6 +7,7 @@ import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by maxmati on 11/30/16
@@ -16,6 +17,7 @@ public class UsersService implements IUsersService {
     private IKrbDao krbDao;
     private IMailService mailService;
     private UserCreatedMailBuilder userCreatedMailBuilder;
+    private Random random = new Random();
 
     public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IMailService mailService, UserCreatedMailBuilder
             userCreatedMailBuilder) {
@@ -79,8 +81,14 @@ public class UsersService implements IUsersService {
     }
 
     private String generatePassword() {
-        // TODO implement password generation
-        return "password"; // https://www.xkcd.com/221/
+        @SuppressWarnings("SpellCheckingInspection")
+        char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()".toCharArray();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 20; i++) {
+            char c = chars[random.nextInt(chars.length)];
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
     @Override
