@@ -3,9 +3,6 @@ package pl.memleak.panel.dal.dto;
 import org.ldaptive.beans.Attribute;
 import org.ldaptive.beans.Entry;
 
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * Created by Kamil on 19.11.2016.
  */
