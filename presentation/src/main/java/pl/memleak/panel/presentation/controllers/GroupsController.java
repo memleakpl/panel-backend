@@ -43,4 +43,24 @@ public class GroupsController {
             throw new NotFoundException(e);
         }
     }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/{groupname}/add/{username}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addToGroup(@PathVariable String groupname, @PathVariable String username){
+        try {
+            groupsService.addToGroup(groupname, username);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/{groupname}/remove/{username}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeFromGroup(@PathVariable String groupname, @PathVariable String username){
+        try {
+            groupsService.removeFromGroup(groupname, username);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        }
+    }
 }

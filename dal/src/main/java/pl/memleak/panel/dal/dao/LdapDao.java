@@ -9,6 +9,7 @@ import org.ldaptive.beans.reflect.DefaultLdapEntryMapper;
 import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.dto.User;
+import pl.memleak.panel.bll.exceptions.GroupModifyException;
 import pl.memleak.panel.dal.configuration.LdapConfig;
 import pl.memleak.panel.dal.dto.LdapGroup;
 import pl.memleak.panel.dal.dto.LdapUser;
@@ -156,6 +157,49 @@ public class LdapDao implements ILdapDao {
     public void deleteGroup(String groupname) {
         LdapGroup toDelete = getGroup(groupname);
         deleteEntity(toDelete.getDistinguishedName());
+    }
+
+    @Override
+    public void addToGroup(String groupname, String username) {
+        LdapGroup group = getGroup(groupname);
+        LdapUser user = getRawUser(username);
+
+        try {
+            editGroupMembership(group, user, AttributeModificationType.ADD);
+        } catch (LdapException e) {
+            throw new GroupModifyException("Cannot add user to group", e);
+        }
+    }
+
+    @Override
+    public void removeFromGroup(String groupname, String username) {
+        LdapGroup group = getGroup(groupname);
+        LdapUser user = getRawUser(username);
+
+        List<String> newGroupMembers = group.getMembers();
+        newGroupMembers.remove(user.getDistinguishedName());
+        if(newGroupMembers.isEmpty()){
+            deleteEntity(group.getDistinguishedName());
+            return;
+        }
+        try {
+            editGroupMembership(group, user, AttributeModificationType.REMOVE);
+        } catch (LdapException e) {
+            throw new GroupModifyException("Cannot delete user from group", e);
+        }
+    }
+
+    private void editGroupMembership(LdapGroup group, LdapUser user, AttributeModificationType operationType)
+            throws LdapException {
+        try(Connection conn = connectionFactory.getConnection()) {
+            conn.open();
+            AttributeModification attributeModification = new AttributeModification(
+                    operationType,
+                    new LdapAttribute("member", user.getDistinguishedName()));
+            ModifyRequest modifyRequest = new ModifyRequest(group.getDistinguishedName(), attributeModification);
+            ModifyOperation modifyOperation = new ModifyOperation(conn);
+            modifyOperation.execute(modifyRequest);
+        }
     }
 
     public LdapGroup getGroup(String groupname) {
