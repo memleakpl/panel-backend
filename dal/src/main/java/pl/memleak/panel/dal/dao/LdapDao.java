@@ -155,13 +155,18 @@ public class LdapDao implements ILdapDao {
 
     @Override
     public void deleteGroup(String groupname) {
-        LdapGroup toDelete = getGroup(groupname);
+        LdapGroup toDelete = getRawGroup(groupname);
         deleteEntity(toDelete.getDistinguishedName());
     }
 
     @Override
+    public void editGroup(Group group) {
+        // TODO implement group editing
+    }
+
+    @Override
     public void addToGroup(String groupname, String username) {
-        LdapGroup group = getGroup(groupname);
+        LdapGroup group = getRawGroup(groupname);
         LdapUser user = getRawUser(username);
 
         try {
@@ -173,7 +178,7 @@ public class LdapDao implements ILdapDao {
 
     @Override
     public void removeFromGroup(String groupname, String username) {
-        LdapGroup group = getGroup(groupname);
+        LdapGroup group = getRawGroup(groupname);
         LdapUser user = getRawUser(username);
 
         List<String> newGroupMembers = group.getMembers();
@@ -202,11 +207,20 @@ public class LdapDao implements ILdapDao {
         }
     }
 
-    public LdapGroup getGroup(String groupname) {
+    public Group getGroup(String baseDn, String groupname){
+        LdapGroup ldapGroup = getRawGroup(baseDn, groupname);
+        return GroupMapper.toGroup(ldapGroup);
+    }
+
+    public Group getGroup(String groupname){
         return getGroup(ldapConfig.getDefaultGroupBaseDn(), groupname);
     }
 
-    public LdapGroup getGroup(String baseDn, String groupname) {
+    private LdapGroup getRawGroup(String groupname) {
+        return getRawGroup(ldapConfig.getDefaultGroupBaseDn(), groupname);
+    }
+
+    private LdapGroup getRawGroup(String baseDn, String groupname) {
         SearchFilter groupFilter = new SearchFilter(ldapConfig.getCnFilter());
         groupFilter.setParameter("cn", groupname);
         return query(baseDn, groupFilter, LdapGroup.class).stream()

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
 import pl.memleak.panel.bll.services.IGroupsService;
+import pl.memleak.panel.presentation.exceptions.BadRequestException;
 import pl.memleak.panel.presentation.exceptions.NotFoundException;
 
 import java.util.List;
@@ -62,5 +63,14 @@ public class GroupsController {
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e);
         }
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, value = "/{groupname}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void editGroup(@PathVariable String groupname, Group group){
+        if ( !groupname.equals(group.getName())){
+            throw new BadRequestException("Groupname doesn't match");
+        }
+        groupsService.editGroup(group);
     }
 }

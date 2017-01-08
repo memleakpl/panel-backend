@@ -11,7 +11,10 @@ public interface IGroupsService {
     List<Group> getAllGroups();
 
     void createGroup(Group group);
+
     void deleteGroup(String groupname);
+
+    void editGroup(Group group);
 
     void addToGroup(String groupname, String username);
 
