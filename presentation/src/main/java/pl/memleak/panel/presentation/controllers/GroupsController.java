@@ -74,6 +74,7 @@ public class GroupsController {
             throw new NotFoundException(e);
         }
     }
+    
     @RequestMapping(method = RequestMethod.PUT, value = "/{groupname}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void editGroup(@PathVariable String groupname, Group group){
