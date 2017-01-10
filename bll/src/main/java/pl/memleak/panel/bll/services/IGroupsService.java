@@ -12,6 +12,8 @@ public interface IGroupsService {
 
     void createGroup(Group group);
 
+    Group getGroup(String groupname);
+
     void deleteGroup(String groupname);
 
     void editGroup(Group group);

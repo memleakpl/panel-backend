@@ -27,6 +27,11 @@ public class GroupsService implements IGroupsService {
     }
 
     @Override
+    public Group getGroup(String groupname) {
+        return ldapDao.getGroup(groupname);
+    }
+
+    @Override
     public void editGroup(Group group) {
         ldapDao.editGroup(group);
     }

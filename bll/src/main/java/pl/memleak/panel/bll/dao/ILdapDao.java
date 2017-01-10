@@ -13,6 +13,10 @@ public interface ILdapDao {
 
     User getUser(String baseDn, String username);
 
+    Group getGroup(String groupname);
+
+    Group getGroup(String baseDn, String groupname);
+
     List<User> getAllUsers();
 
     List<User> getAllUsers(String baseDn);

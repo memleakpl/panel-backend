@@ -14,14 +14,14 @@ public class GroupMapper {
 
     private static final String GROUP_DN_FORMAT = "cn=%s,%s";
 
-    private static String getUid(String dn){
-        if(dn == null) return null;
+    private static String getUid(String dn) {
+        if (dn == null) return null;
 
         try {
             LdapName name = new LdapName(dn);
             String rdn = name.get(name.size() - 1);
             String[] parts = rdn.split("=");
-            if(parts[0].equals("uid")){
+            if (parts[0].equals("uid")) {
                 return parts[1];
             } else {
                 throw new InvalidNameException("User dn have to begins with uid");
@@ -31,7 +31,7 @@ public class GroupMapper {
         }
     }
 
-    public static Group toGroup(LdapGroup ldapGroup){
+    public static Group toGroup(LdapGroup ldapGroup) {
         return new Group(
                 ldapGroup.getName(),
                 getUid(ldapGroup.getOwner()),
@@ -45,6 +45,15 @@ public class GroupMapper {
                 group.getName(),
                 owner.getDistinguishedName(),
                 group.getDescription()
+        );
+    }
+
+    public static LdapGroup ldapGroupUpdate(Group newGroup, LdapUser owner, LdapGroup oldGroup) {
+        return new LdapGroup(
+                oldGroup.getDistinguishedName(),
+                newGroup.getName(),
+                oldGroup.getOwner(),
+                owner.getDistinguishedName()
         );
     }
 }
