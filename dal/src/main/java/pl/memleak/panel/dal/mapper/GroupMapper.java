@@ -52,8 +52,7 @@ public class GroupMapper {
         return new LdapGroup(
                 oldGroup.getDistinguishedName(),
                 newGroup.getName(),
-                oldGroup.getOwner(),
-                owner.getDistinguishedName()
-        );
+                owner.getDistinguishedName(),
+                newGroup.getDescription());
     }
 }

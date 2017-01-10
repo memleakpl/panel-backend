@@ -179,7 +179,7 @@ public class LdapDao implements ILdapDao {
             ModifyOperation modify = new ModifyOperation(connection);
             modify.execute(modifyRequest);
         } catch(LdapException e){
-            throw new RuntimeException("Cannot edit group", e);
+            throw new GroupModifyException("Cannot edit group", e);
         }
     }
 
