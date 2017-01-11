@@ -22,4 +22,6 @@ public interface IUsersService {
     void editUser(User user);
 
     List<String> getUserGroups(String username);
+
+    boolean isAdmin(String name);
 }
