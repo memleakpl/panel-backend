@@ -20,4 +20,6 @@ public interface IUsersService {
     void changePassword(String username, String password);
 
     void editUser(User user);
+
+    List<String> getUserGroups(String username);
 }

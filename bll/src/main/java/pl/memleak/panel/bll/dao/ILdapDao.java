@@ -36,4 +36,6 @@ public interface ILdapDao {
     void addToGroup(String groupname, String username);
 
     void removeFromGroup(String groupname, String username);
+
+    List<Group> getUserGroups(String username);
 }

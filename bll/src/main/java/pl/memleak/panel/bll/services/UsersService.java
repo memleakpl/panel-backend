@@ -3,11 +3,13 @@ package pl.memleak.panel.bll.services;
 import pl.memleak.panel.bll.dao.IKrbDao;
 import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dao.KrbException;
+import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
 
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Created by maxmati on 11/30/16
@@ -94,5 +96,12 @@ public class UsersService implements IUsersService {
     @Override
     public void editUser(User user) {
             ldapDao.editUser(user);
+    }
+
+    @Override
+    public List<String> getUserGroups(String username) {
+        return ldapDao.getUserGroups(username).stream()
+                .map(Group::getName)
+                .collect(Collectors.toList());
     }
 }
