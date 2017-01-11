@@ -5,6 +5,7 @@ import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dao.KrbException;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.dto.User;
+import pl.memleak.panel.bll.exceptions.OperationNotPermittedException;
 import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
 
 import java.util.List;
@@ -32,17 +33,23 @@ public class UsersService implements IUsersService {
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public List<User> getAllUsers(String authorizationUser) {
+        if(!isAdmin(authorizationUser)) throw new OperationNotPermittedException();
+
         return this.ldapDao.getAllUsers();
     }
 
     @Override
-    public User getUser(String username) {
+    public User getUser(String username, String authorizationUser) {
+        if(!isAdmin(authorizationUser)) throw new OperationNotPermittedException();
+
         return this.ldapDao.getUser(username);
     }
 
     @Override
-    public void createUser(User user) {
+    public void createUser(User user, String authorizationUser) {
+        if(!isAdmin(authorizationUser)) throw new OperationNotPermittedException();
+
         try {
             String password = generatePassword();
 
@@ -60,7 +67,9 @@ public class UsersService implements IUsersService {
     }
 
     @Override
-    public void deleteUser(String username) {
+    public void deleteUser(String username, String authorizationUser) {
+        if(!isAdmin(authorizationUser)) throw new OperationNotPermittedException();
+
         try {
             ldapDao.deleteUser(username);
             krbDao.deletePrincipal(username);
@@ -96,12 +105,16 @@ public class UsersService implements IUsersService {
     }
 
     @Override
-    public void editUser(User user) {
-            ldapDao.editUser(user);
+    public void editUser(User user, String authorizationUser) {
+        if(!isAdmin(authorizationUser)) throw new OperationNotPermittedException();
+
+        ldapDao.editUser(user);
     }
 
     @Override
-    public List<String> getUserGroups(String username) {
+    public List<String> getUserGroups(String username, String authorizationUser) {
+        if(!isAdmin(authorizationUser)) throw new OperationNotPermittedException();
+
         return ldapDao.getUserGroups(username).stream()
                 .map(Group::getName)
                 .collect(Collectors.toList());
