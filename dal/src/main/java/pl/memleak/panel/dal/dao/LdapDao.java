@@ -189,6 +189,15 @@ public class LdapDao implements ILdapDao {
         }
     }
 
+    @Override
+    public List<Group> getUserGroups(String username) {
+        LdapUser user = getRawUser(username);
+        SearchFilter groupMemberFilter = new SearchFilter(ldapConfig.getGroupMemberFilter());
+        groupMemberFilter.setParameter("dn", user.getDistinguishedName());
+        List<LdapGroup> groups = query(ldapConfig.getDefaultGroupBaseDn(), groupMemberFilter, LdapGroup.class);
+        return groups.stream().map(GroupMapper::toGroup).collect(Collectors.toList());
+    }
+
     private void editGroupMembership(LdapGroup group, LdapUser user, AttributeModificationType operationType)
             throws LdapException {
         try(Connection conn = connectionFactory.getConnection()) {

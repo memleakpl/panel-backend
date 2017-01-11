@@ -47,6 +47,15 @@ public class UsersController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/{username}/groups")
+    public List<String> getUserGroups(@PathVariable String username){
+        try {
+            return usersService.getUserGroups(username);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        }
+    }
+
     @RequestMapping(method = RequestMethod.DELETE, value = "/{username}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable String username) {
