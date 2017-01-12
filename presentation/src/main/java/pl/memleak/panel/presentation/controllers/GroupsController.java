@@ -2,14 +2,19 @@ package pl.memleak.panel.presentation.controllers;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
 import pl.memleak.panel.bll.exceptions.OperationNotPermittedException;
 import pl.memleak.panel.bll.services.IGroupsService;
+import pl.memleak.panel.presentation.dto.GroupRequest;
+import pl.memleak.panel.presentation.exceptions.BadRequestException;
 import pl.memleak.panel.presentation.exceptions.ForbiddenException;
 import pl.memleak.panel.presentation.exceptions.NotFoundException;
+import pl.memleak.panel.presentation.mappers.GroupMapper;
 
+import javax.validation.Valid;
 import java.util.List;
 
 import static pl.memleak.panel.presentation.controllers.Utils.getCurrentUser;
@@ -38,9 +43,13 @@ public class GroupsController {
 
     @RequestMapping(method = RequestMethod.POST, value = "")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void createUser(@RequestBody Group group) {
+    public void createUser(@RequestBody @Valid GroupRequest group, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            throw new BadRequestException();
+        }
+
         try {
-            groupsService.createGroup(group, getCurrentUser());
+            groupsService.createGroup(GroupMapper.toGroup(group), getCurrentUser());
         } catch (OperationNotPermittedException e) {
             throw new ForbiddenException(e);
         }
