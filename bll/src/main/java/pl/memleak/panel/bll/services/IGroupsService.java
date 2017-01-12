@@ -8,12 +8,12 @@ import java.util.List;
  * Created by maxmati on 12/22/16
  */
 public interface IGroupsService {
-    List<Group> getAllGroups();
+    List<Group> getAllGroups(String authorizationUser);
 
-    void createGroup(Group group);
-    void deleteGroup(String groupname);
+    void createGroup(Group group, String authorizationUser);
+    void deleteGroup(String groupname, String authorizationUser);
 
-    void addToGroup(String groupname, String username);
+    void addToGroup(String groupname, String username, String authorizationUser);
 
-    void removeFromGroup(String groupname, String username);
+    void removeFromGroup(String groupname, String username, String authorizationUser);
 }
