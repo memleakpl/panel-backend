@@ -9,6 +9,8 @@ import pl.memleak.panel.bll.dto.ChangePasswordRequest;
 import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
 import pl.memleak.panel.bll.services.IUsersService;
+import pl.memleak.panel.bll.services.UsersService;
+import pl.memleak.panel.presentation.dto.IsAdminResponse;
 import pl.memleak.panel.presentation.exceptions.BadRequestException;
 import pl.memleak.panel.presentation.exceptions.NotFoundException;
 import pl.memleak.panel.presentation.exceptions.UnauthorizedException;
@@ -91,5 +93,17 @@ public class UsersController {
         }
 
         usersService.editUser(user);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/isAdmin")
+    public IsAdminResponse isAdmin(){
+        Authentication principal = SecurityContextHolder.getContext().getAuthentication();
+
+        if (principal == null)
+            throw new RuntimeException("Missing authentication principal");
+
+        IsAdminResponse response = new IsAdminResponse();
+        response.setAdmin(usersService.isAdmin(principal.getName()));
+        return response;
     }
 }

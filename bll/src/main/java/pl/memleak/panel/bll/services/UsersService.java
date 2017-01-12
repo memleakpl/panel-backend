@@ -15,18 +15,20 @@ import java.util.stream.Collectors;
  * Created by maxmati on 11/30/16
  */
 public class UsersService implements IUsersService {
-    private ILdapDao ldapDao;
-    private IKrbDao krbDao;
-    private IMailService mailService;
-    private UserCreatedMailBuilder userCreatedMailBuilder;
-    private Random random = new Random();
+    private final ILdapDao ldapDao;
+    private final IKrbDao krbDao;
+    private final IMailService mailService;
+    private final UserCreatedMailBuilder userCreatedMailBuilder;
+    private final Random random = new Random();
+    private final String adminGroupName;
 
-    public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IMailService mailService, UserCreatedMailBuilder
-            userCreatedMailBuilder) {
+    public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IMailService mailService,
+                        UserCreatedMailBuilder userCreatedMailBuilder, String adminGroupName) {
         this.ldapDao = ldapDao;
         this.krbDao = krbDao;
         this.mailService = mailService;
         this.userCreatedMailBuilder = userCreatedMailBuilder;
+        this.adminGroupName = adminGroupName;
     }
 
     @Override
@@ -103,5 +105,11 @@ public class UsersService implements IUsersService {
         return ldapDao.getUserGroups(username).stream()
                 .map(Group::getName)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isAdmin(String name) {
+        List<Group> groups = ldapDao.getUserGroups(name);
+        return groups.stream().anyMatch(group -> group.getName().equals(adminGroupName));
     }
 }
