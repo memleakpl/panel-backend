@@ -9,6 +9,13 @@ public class User {
     private String email;
     private String lastName;
 
+    public User(String username, String firstName, String email, String lastName) {
+        this.username = username;
+        this.firstName = firstName;
+        this.email = email;
+        this.lastName = lastName;
+    }
+
     public String getUsername() {
         return username;
     }
