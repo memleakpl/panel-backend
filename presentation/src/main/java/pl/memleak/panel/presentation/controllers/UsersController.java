@@ -106,7 +106,10 @@ public class UsersController {
 
     @RequestMapping(method = RequestMethod.PUT, value="/{username}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void editUser(@RequestBody @Valid User user, @PathVariable String username, BindingResult bindingResult) {
+    public void editUser(
+            @RequestBody @Valid UserRequest user,
+            @PathVariable String username,
+            BindingResult bindingResult) {
         if(bindingResult.hasErrors()) {
             throw new BadRequestException();
         }
@@ -116,7 +119,7 @@ public class UsersController {
         }
 
         try {
-            usersService.editUser(user, getCurrentUser());
+            usersService.editUser(UserMapper.toUser(user), getCurrentUser());
         } catch (OperationNotPermittedException e) {
             throw new ForbiddenException(e);
         }
