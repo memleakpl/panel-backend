@@ -2,8 +2,6 @@ package pl.memleak.panel.presentation.controllers;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.memleak.panel.bll.dto.ChangePasswordRequest;
 import pl.memleak.panel.bll.dto.User;
@@ -18,13 +16,15 @@ import pl.memleak.panel.presentation.exceptions.UnauthorizedException;
 
 import java.util.List;
 
+import static pl.memleak.panel.presentation.controllers.Utils.getCurrentUser;
+
 /**
  * Created by maxmati on 11/26/16
  */
 @RestController
 @RequestMapping("/api/user")
 public class UsersController {
-    private IUsersService usersService;
+    private final IUsersService usersService;
 
     public UsersController(@Qualifier(value = "usersService") IUsersService usersService) {
         this.usersService = usersService;
@@ -110,22 +110,8 @@ public class UsersController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/isAdmin")
     public IsAdminResponse isAdmin(){
-        Authentication principal = SecurityContextHolder.getContext().getAuthentication();
-
-        if (principal == null)
-            throw new RuntimeException("Missing authentication principal");
-
         IsAdminResponse response = new IsAdminResponse();
-        response.setAdmin(usersService.isAdmin(principal.getName()));
+        response.setAdmin(usersService.isAdmin(getCurrentUser()));
         return response;
-    }
-
-    private String getCurrentUser() {
-        Authentication principal = SecurityContextHolder.getContext().getAuthentication();
-
-        if (principal == null)
-            throw new RuntimeException("Missing authentication principal");
-
-        return principal.getName();
     }
 }
