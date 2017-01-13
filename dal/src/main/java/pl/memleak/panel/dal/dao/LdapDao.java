@@ -121,8 +121,12 @@ public class LdapDao implements ILdapDao {
 
     @Override
     public void deleteUser(String username) {
-        LdapUser toDelete = getRawUser(username);
-        deleteEntity(toDelete.getDistinguishedName());
+        try {
+            LdapUser toDelete = getRawUser(username);
+            deleteEntity(toDelete.getDistinguishedName());
+        } catch (EntityNotFoundException e) {
+            //ignore user already deleted
+        }
     }
 
     private void deleteEntity(String dn) {
@@ -155,8 +159,12 @@ public class LdapDao implements ILdapDao {
 
     @Override
     public void deleteGroup(String groupname) {
-        LdapGroup toDelete = getGroup(groupname);
-        deleteEntity(toDelete.getDistinguishedName());
+        try {
+            LdapGroup toDelete = getGroup(groupname);
+            deleteEntity(toDelete.getDistinguishedName());
+        } catch (EntityNotFoundException e) {
+            //ignore user already deleted
+        }
     }
 
     @Override
