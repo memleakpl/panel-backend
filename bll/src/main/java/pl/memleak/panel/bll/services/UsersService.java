@@ -4,6 +4,7 @@ import pl.memleak.panel.bll.dao.IKrbDao;
 import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dao.KrbException;
 import pl.memleak.panel.bll.dto.Group;
+import pl.memleak.panel.bll.dto.Mail;
 import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.bll.exceptions.OperationNotPermittedException;
 import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
@@ -104,6 +105,10 @@ public class UsersService implements IUsersService {
         return sb.toString();
     }
 
+    private String generateToken() {
+        return "token";
+    }
+
     @Override
     public void editUser(User user, String authorizationUser) {
         if(!isAdmin(authorizationUser)) throw new OperationNotPermittedException();
@@ -124,5 +129,18 @@ public class UsersService implements IUsersService {
     public boolean isAdmin(String name) {
         List<Group> groups = ldapDao.getUserGroups(name);
         return groups.stream().anyMatch(group -> group.getName().equals(adminGroupName));
+    }
+
+    @Override
+    public void generatePasswordReset(String username, String mail) {
+        if ( !mail.equals(ldapDao.getUser(username).getEmail()) ){
+            throw new RuntimeException("Mail doesn't match"); // TODO implement new exception
+        }
+        mailService.sendMail(new Mail("nadawca","odbiorca","temat","cialo")); // TODO send mail
+    }
+
+    @Override
+    public void activatePasswordReset(String username, String token) {
+
     }
 }
