@@ -94,7 +94,7 @@ public class GroupsController {
     @RequestMapping(method = RequestMethod.GET, value = "/{groupname}")
     public Group getGroup(@PathVariable String groupname) {
         try {
-            return groupsService.getGroup(groupname);
+            return groupsService.getGroup(groupname, getCurrentUser());
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e);
         }
@@ -106,6 +106,6 @@ public class GroupsController {
         if ( !groupname.equals(group.getName())){
             throw new BadRequestException("Groupname doesn't match");
         }
-        groupsService.editGroup(group);
+        groupsService.editGroup(group, getCurrentUser());
     }
 }

@@ -13,10 +13,10 @@ public interface IGroupsService {
     void createGroup(Group group, String authorizationUser);
     void deleteGroup(String groupname, String authorizationUser);
 
-    Group getGroup(String groupname);
+    Group getGroup(String groupname, String authorizationUser);
 
     void addToGroup(String groupname, String username, String authorizationUser);
-    void editGroup(Group group);
+    void editGroup(Group group, String authorizationUser);
 
     void removeFromGroup(String groupname, String username, String authorizationUser);
 }

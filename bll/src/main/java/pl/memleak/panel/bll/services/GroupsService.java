@@ -34,12 +34,16 @@ public class GroupsService implements IGroupsService {
     }
 
     @Override
-    public Group getGroup(String groupname) {
+    public Group getGroup(String groupname, String authorizationUser) {
+        if(!usersService.isAdmin(authorizationUser)) throw new OperationNotPermittedException();
+
         return ldapDao.getGroup(groupname);
     }
 
     @Override
-    public void editGroup(Group group) {
+    public void editGroup(Group group, String authorizationUser) {
+        if(!usersService.isAdmin(authorizationUser)) throw new OperationNotPermittedException();
+
         ldapDao.editGroup(group);
     }
 
