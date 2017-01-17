@@ -12,16 +12,11 @@ public interface IGroupsService {
 
     void createGroup(Group group, String authorizationUser);
     void deleteGroup(String groupname, String authorizationUser);
-    void createGroup(Group group);
 
     Group getGroup(String groupname);
 
-    void deleteGroup(String groupname);
-
     void addToGroup(String groupname, String username, String authorizationUser);
     void editGroup(Group group);
-
-    void addToGroup(String groupname, String username);
 
     void removeFromGroup(String groupname, String username, String authorizationUser);
 }
