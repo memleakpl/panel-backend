@@ -57,7 +57,7 @@ public class GroupsController {
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{groupname}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteGroup(@PathVariable String groupname){
+    public void deleteGcleroup(@PathVariable String groupname){
         try {
             groupsService.deleteGroup(groupname, getCurrentUser());
         } catch (EntityNotFoundException e) {
@@ -97,15 +97,21 @@ public class GroupsController {
             return groupsService.getGroup(groupname, getCurrentUser());
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e);
+        } catch (OperationNotPermittedException e) {
+            throw new ForbiddenException(e);
         }
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{groupname}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void editGroup(@PathVariable String groupname, Group group){
+    public void editGroup(@PathVariable String groupname, @RequestBody @Valid GroupRequest group){
         if ( !groupname.equals(group.getName())){
             throw new BadRequestException("Groupname doesn't match");
         }
-        groupsService.editGroup(group, getCurrentUser());
+        try {
+            groupsService.editGroup(GroupMapper.toGroup(group), getCurrentUser());
+        } catch (OperationNotPermittedException e) {
+            throw new ForbiddenException(e);
+        }
     }
 }
