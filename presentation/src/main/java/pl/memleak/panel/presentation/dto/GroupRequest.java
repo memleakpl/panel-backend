@@ -8,7 +8,7 @@ import javax.validation.constraints.Pattern;
  */
 public class GroupRequest {
     @NotNull
-    @Pattern(regexp = "^[a-z0-9ęóąśłżźćń-]+$", flags = Pattern.Flag.CASE_INSENSITIVE)
+    @Pattern(regexp = "^[\\sa-z0-9ęóąśłżźćń(),.-]+$", flags = Pattern.Flag.CASE_INSENSITIVE)
     private String description;
     @NotNull
     @Pattern(regexp = "^[a-z0-9]+$", flags = Pattern.Flag.CASE_INSENSITIVE)
