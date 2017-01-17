@@ -57,7 +57,7 @@ public class GroupsController {
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{groupname}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteGcleroup(@PathVariable String groupname){
+    public void deleteGroup(@PathVariable String groupname){
         try {
             groupsService.deleteGroup(groupname, getCurrentUser());
         } catch (EntityNotFoundException e) {
@@ -104,7 +104,13 @@ public class GroupsController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{groupname}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void editGroup(@PathVariable String groupname, @RequestBody @Valid GroupRequest group){
+    public void editGroup(@PathVariable String groupname,
+                          @RequestBody @Valid GroupRequest group,
+                          BindingResult bindingResult){
+        if(bindingResult.hasErrors()) {
+            throw new BadRequestException();
+        }
+
         if ( !groupname.equals(group.getName())){
             throw new BadRequestException("Groupname doesn't match");
         }
