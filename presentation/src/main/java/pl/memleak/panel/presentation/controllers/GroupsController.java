@@ -90,4 +90,34 @@ public class GroupsController {
             throw new ForbiddenException(e);
         }
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{groupname}")
+    public Group getGroup(@PathVariable String groupname) {
+        try {
+            return groupsService.getGroup(groupname, getCurrentUser());
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        } catch (OperationNotPermittedException e) {
+            throw new ForbiddenException(e);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, value = "/{groupname}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void editGroup(@PathVariable String groupname,
+                          @RequestBody @Valid GroupRequest group,
+                          BindingResult bindingResult){
+        if(bindingResult.hasErrors()) {
+            throw new BadRequestException();
+        }
+
+        if ( !groupname.equals(group.getName())){
+            throw new BadRequestException("Groupname doesn't match");
+        }
+        try {
+            groupsService.editGroup(GroupMapper.toGroup(group), getCurrentUser());
+        } catch (OperationNotPermittedException e) {
+            throw new ForbiddenException(e);
+        }
+    }
 }
