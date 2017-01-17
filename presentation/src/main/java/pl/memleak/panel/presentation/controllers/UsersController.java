@@ -4,16 +4,25 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import pl.memleak.panel.bll.dto.ChangePasswordRequest;
 import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
+import pl.memleak.panel.bll.exceptions.OperationNotPermittedException;
 import pl.memleak.panel.bll.services.IUsersService;
+import pl.memleak.panel.presentation.dto.UserRequest;
+import pl.memleak.panel.presentation.dto.IsAdminResponse;
 import pl.memleak.panel.presentation.exceptions.BadRequestException;
+import pl.memleak.panel.presentation.exceptions.ForbiddenException;
 import pl.memleak.panel.presentation.exceptions.NotFoundException;
 import pl.memleak.panel.presentation.exceptions.UnauthorizedException;
+import pl.memleak.panel.presentation.mappers.UserMapper;
 
+import javax.validation.Valid;
 import java.util.List;
+
+import static pl.memleak.panel.presentation.controllers.Utils.getCurrentUser;
 
 /**
  * Created by maxmati on 11/26/16
@@ -21,7 +30,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user")
 public class UsersController {
-    private IUsersService usersService;
+    private final IUsersService usersService;
 
     public UsersController(@Qualifier(value = "usersService") IUsersService usersService) {
         this.usersService = usersService;
@@ -29,21 +38,46 @@ public class UsersController {
 
     @RequestMapping(method = RequestMethod.GET, value = "")
     public List<User> getUsers() {
-        return usersService.getAllUsers();
+        try {
+            return usersService.getAllUsers(getCurrentUser());
+        } catch (OperationNotPermittedException e) {
+            throw new ForbiddenException(e);
+        }
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void createUser(@RequestBody User user) {
-        usersService.createUser(user);
-    } //TODO: model validation
+    public void createUser(@RequestBody @Valid UserRequest user, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            throw new BadRequestException();
+        }
+
+        try {
+            usersService.createUser(UserMapper.toUser(user), getCurrentUser());
+        } catch (OperationNotPermittedException e) {
+            throw new ForbiddenException(e);
+        }
+    }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{username}")
     public User getUser(@PathVariable String username) {
         try {
-            return usersService.getUser(username);
+            return usersService.getUser(username, getCurrentUser());
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e);
+        } catch (OperationNotPermittedException e) {
+            throw new ForbiddenException(e);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{username}/groups")
+    public List<String> getUserGroups(@PathVariable String username){
+        try {
+            return usersService.getUserGroups(username, getCurrentUser());
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        } catch (OperationNotPermittedException e) {
+            throw new ForbiddenException(e);
         }
     }
 
@@ -51,22 +85,18 @@ public class UsersController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable String username) {
         try {
-            usersService.deleteUser(username);
+            usersService.deleteUser(username, getCurrentUser());
         } catch (EntityNotFoundException e) {
             throw new NotFoundException(e);
+        } catch (OperationNotPermittedException e) {
+            throw new ForbiddenException(e);
         }
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
-        Authentication principal = SecurityContextHolder.getContext().getAuthentication();
-        String username;
-
-        if (principal == null)
-            throw new RuntimeException("Missing authentication principal");
-
-        username = principal.getName();
+        String username = getCurrentUser();
 
         if (!usersService.authenticate(username, changePasswordRequest.getOldPassword()))
             throw new UnauthorizedException("Invalid credentials");
@@ -76,11 +106,29 @@ public class UsersController {
 
     @RequestMapping(method = RequestMethod.PUT, value="/{username}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void editUser(@RequestBody User user, @PathVariable String username) {
+    public void editUser(
+            @RequestBody @Valid UserRequest user,
+            @PathVariable String username,
+            BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            throw new BadRequestException();
+        }
+
         if (!user.getUsername().equals(username)) {
             throw new BadRequestException("Username doesn't match");
         }
 
-        usersService.editUser(user);
+        try {
+            usersService.editUser(UserMapper.toUser(user), getCurrentUser());
+        } catch (OperationNotPermittedException e) {
+            throw new ForbiddenException(e);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/isAdmin")
+    public IsAdminResponse isAdmin(){
+        IsAdminResponse response = new IsAdminResponse();
+        response.setAdmin(usersService.isAdmin(getCurrentUser()));
+        return response;
     }
 }

@@ -121,8 +121,12 @@ public class LdapDao implements ILdapDao {
 
     @Override
     public void deleteUser(String username) {
-        LdapUser toDelete = getRawUser(username);
-        deleteEntity(toDelete.getDistinguishedName());
+        try {
+            LdapUser toDelete = getRawUser(username);
+            deleteEntity(toDelete.getDistinguishedName());
+        } catch (EntityNotFoundException e) {
+            //ignore user already deleted
+        }
     }
 
     private void deleteEntity(String dn) {
@@ -155,8 +159,12 @@ public class LdapDao implements ILdapDao {
 
     @Override
     public void deleteGroup(String groupname) {
-        LdapGroup toDelete = getRawGroup(groupname);
-        deleteEntity(toDelete.getDistinguishedName());
+        try {
+            LdapGroup toDelete = getRawGroup(groupname);
+            deleteEntity(toDelete.getDistinguishedName());
+        } catch (EntityNotFoundException e) {
+            //ignore user already deleted
+        }
     }
 
     @Override
@@ -211,6 +219,15 @@ public class LdapDao implements ILdapDao {
         } catch (LdapException e) {
             throw new GroupModifyException("Cannot delete user from group", e);
         }
+    }
+
+    @Override
+    public List<Group> getUserGroups(String username) {
+        LdapUser user = getRawUser(username);
+        SearchFilter groupMemberFilter = new SearchFilter(ldapConfig.getGroupMemberFilter());
+        groupMemberFilter.setParameter("dn", user.getDistinguishedName());
+        List<LdapGroup> groups = query(ldapConfig.getDefaultGroupBaseDn(), groupMemberFilter, LdapGroup.class);
+        return groups.stream().map(GroupMapper::toGroup).collect(Collectors.toList());
     }
 
     private void editGroupMembership(LdapGroup group, LdapUser user, AttributeModificationType operationType)
