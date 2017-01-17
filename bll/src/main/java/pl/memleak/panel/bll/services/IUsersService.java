@@ -24,4 +24,8 @@ public interface IUsersService {
     List<String> getUserGroups(String username, String authorizationUser);
 
     boolean isAdmin(String name);
+
+    void generatePasswordReset(String username, String mail);
+
+    void activatePasswordReset(String username, String token);
 }
