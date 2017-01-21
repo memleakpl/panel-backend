@@ -29,10 +29,9 @@ public class PasswordRequestMailBuilder implements MailBuilder{
 
     @Override
     public Mail build() {
-        if(user == null)
-            throw new RuntimeException("User not provided");
-        if(token == null)
-            throw new RuntimeException("Token not provided");
+        if(user == null) throw new RuntimeException("User not provided");
+        if(token == null) throw new RuntimeException("Token not provided");
+
         return new Mail(sender, user.getEmail(), subject, formatMessage(user.getFirstName(), address+token));
     }
 
