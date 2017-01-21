@@ -43,7 +43,7 @@ public class GroupsController {
 
     @RequestMapping(method = RequestMethod.POST, value = "")
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void createUser(@RequestBody @Valid GroupRequest group, BindingResult bindingResult) {
+    public void createGroup(@RequestBody @Valid GroupRequest group, BindingResult bindingResult) {
         if(bindingResult.hasErrors()) {
             throw new BadRequestException();
         }
