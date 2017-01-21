@@ -24,8 +24,9 @@ public class UsersService implements IUsersService {
     private final UserCreatedMailBuilder userCreatedMailBuilder;
     private final PasswordRequestMailBuilder passwordRequestMailBuilder;
     private final String adminGroupName;
-    private final String passwordPattern = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
-    private final String tokenPattern = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"; 
+    private static final String PASSWORD_PATTERN =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
+    private static final String TOKEN_PATTERN = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
     public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IMailService mailService,
                         UserCreatedMailBuilder userCreatedMailBuilder,
@@ -100,11 +101,11 @@ public class UsersService implements IUsersService {
     }
 
     private String generatePassword() {
-        return RandomSequenceGenerator.generate(20, passwordPattern);
+        return RandomSequenceGenerator.generate(20, PASSWORD_PATTERN);
     }
 
     private String generateToken() {
-        return RandomSequenceGenerator.generate(10, tokenPattern);
+        return RandomSequenceGenerator.generate(10, TOKEN_PATTERN);
     }
 
     @Override
