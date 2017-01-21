@@ -32,11 +32,11 @@ public class PasswordRequestMailBuilder implements MailBuilder{
         if(user == null) throw new RuntimeException("User not provided");
         if(token == null) throw new RuntimeException("Token not provided");
 
-        return new Mail(sender, user.getEmail(), subject, formatMessage(user.getFirstName(), address+token));
+        return new Mail(sender, user.getEmail(), subject, formatMessage(user.getFirstName(), address, token));
     }
 
-    private String formatMessage(String name, String link) {
-        return String.format("Hello %s, if you want to reset your password, click here:. %s" +
-                "If you haven't been trying to change your password, ignore this message.", name, link);
+    private String formatMessage(String name, String address, String token) {
+        return String.format("Hello %s, if you want to reset your password, click here:. %s%s" +
+                "If you haven't been trying to change your password, ignore this message.", name, address, token);
     }
 }
