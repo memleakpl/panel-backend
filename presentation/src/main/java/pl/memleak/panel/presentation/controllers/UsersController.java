@@ -134,14 +134,13 @@ public class UsersController {
 
     @RequestMapping(method = RequestMethod.POST, value ="/password/reset")
     //TODO fix endpoint
-    public void generatePasswordReset(@RequestBody PasswordResetRequest request, @PathVariable String username,
-                                      @PathVariable String token){
+    public void generatePasswordReset(@RequestBody PasswordResetRequest request){
 
         usersService.generatePasswordReset(request.getUsername(), request.getMail());
     }
 
-    @RequestMapping(method = RequestMethod.POST, value ="/password/reset/confirm") //TODO fix endpoint
-    public void activatePasswordReset(@RequestBody PasswordResetConfirmRequest request, @PathVariable String username){
+    @RequestMapping(method = RequestMethod.POST, value ="/password/reset/confirm") 
+    public void activatePasswordReset(@RequestBody PasswordResetConfirmRequest request){
 
         usersService.activatePasswordReset(request.getUsername(), request.getToken());
     }
