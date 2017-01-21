@@ -4,13 +4,14 @@ import pl.memleak.panel.bll.dao.IKrbDao;
 import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dao.KrbException;
 import pl.memleak.panel.bll.dto.Group;
-import pl.memleak.panel.bll.dto.Mail;
 import pl.memleak.panel.bll.dto.User;
+import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
 import pl.memleak.panel.bll.exceptions.OperationNotPermittedException;
+import pl.memleak.panel.bll.mail.PasswordRequestMailBuilder;
 import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
+import pl.memleak.panel.bll.utils.RandomSequenceGenerator;
 
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -21,15 +22,19 @@ public class UsersService implements IUsersService {
     private final IKrbDao krbDao;
     private final IMailService mailService;
     private final UserCreatedMailBuilder userCreatedMailBuilder;
-    private final Random random = new Random();
+    private final PasswordRequestMailBuilder passwordRequestMailBuilder;
     private final String adminGroupName;
+    private final String passwordPattern = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
+    private final String tokenPattern = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"; 
 
     public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IMailService mailService,
-                        UserCreatedMailBuilder userCreatedMailBuilder, String adminGroupName) {
+                        UserCreatedMailBuilder userCreatedMailBuilder,
+                        PasswordRequestMailBuilder passwordRequestMailBuilder, String adminGroupName) {
         this.ldapDao = ldapDao;
         this.krbDao = krbDao;
         this.mailService = mailService;
         this.userCreatedMailBuilder = userCreatedMailBuilder;
+        this.passwordRequestMailBuilder = passwordRequestMailBuilder;
         this.adminGroupName = adminGroupName;
     }
 
@@ -95,18 +100,11 @@ public class UsersService implements IUsersService {
     }
 
     private String generatePassword() {
-        @SuppressWarnings("SpellCheckingInspection")
-        char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()".toCharArray();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 20; i++) {
-            char c = chars[random.nextInt(chars.length)];
-            sb.append(c);
-        }
-        return sb.toString();
+        return RandomSequenceGenerator.generate(20, passwordPattern);
     }
 
     private String generateToken() {
-        return "token";
+        return RandomSequenceGenerator.generate(10, tokenPattern);
     }
 
     @Override
@@ -133,10 +131,14 @@ public class UsersService implements IUsersService {
 
     @Override
     public void generatePasswordReset(String username, String mail) {
-        if ( !mail.equals(ldapDao.getUser(username).getEmail()) ){
-            throw new RuntimeException("Mail doesn't match"); // TODO implement new exception
+        User user = ldapDao.getUser(username);
+        if ( !mail.equals(user.getEmail()) ){
+            throw new EntityNotFoundException("Mail doesn't match");
         }
-        mailService.sendMail(new Mail("nadawca","odbiorca","temat","cialo")); // TODO send mail
+
+        passwordRequestMailBuilder.setToken(generateToken());
+        passwordRequestMailBuilder.setUser(user);
+        mailService.sendMail(passwordRequestMailBuilder.build());
     }
 
     @Override
