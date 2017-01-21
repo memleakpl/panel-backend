@@ -11,12 +11,12 @@ public class PasswordRequestMailBuilder implements MailBuilder{
     private final String subject;
     private User user;
     private String token;
-    private final String address;
+    private final String URL;
 
-    public PasswordRequestMailBuilder(String sender, String subject, String address) {
+    public PasswordRequestMailBuilder(String sender, String subject, String URL) {
         this.sender = sender;
         this.subject = subject;
-        this.address = address;
+        this.URL = URL;
     }
 
     public void setUser(User user) {
@@ -32,7 +32,7 @@ public class PasswordRequestMailBuilder implements MailBuilder{
         if(user == null) throw new RuntimeException("User not provided");
         if(token == null) throw new RuntimeException("Token not provided");
 
-        return new Mail(sender, user.getEmail(), subject, formatMessage(user.getFirstName(), address, token));
+        return new Mail(sender, user.getEmail(), subject, formatMessage(user.getFirstName(), URL, token));
     }
 
     private String formatMessage(String name, String address, String token) {

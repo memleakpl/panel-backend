@@ -133,13 +133,15 @@ public class UsersController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value ="/password/reset")
-    //TODO fix endpoint
-    public void generatePasswordReset(@RequestBody PasswordResetRequest request){
-
-        usersService.generatePasswordReset(request.getUsername(), request.getMail());
+    public void generatePasswordReset(@RequestBody PasswordResetRequest request) {
+        try {
+            usersService.generatePasswordReset(request.getUsername(), request.getMail());
+        } catch(OperationNotPermittedException e){
+            throw new ForbiddenException(e);
+        }
     }
 
-    @RequestMapping(method = RequestMethod.POST, value ="/password/reset/confirm") 
+    @RequestMapping(method = RequestMethod.POST, value ="/password/reset/confirm")
     public void activatePasswordReset(@RequestBody PasswordResetConfirmRequest request){
 
         usersService.activatePasswordReset(request.getUsername(), request.getToken());
