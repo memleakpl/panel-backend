@@ -132,20 +132,16 @@ public class UsersController {
         return response;
     }
 
-    @RequestMapping(method = RequestMethod.POST, value =" /{username}")
-    public void generatePasswordReset(@RequestBody PasswordResetRequest request, @PathVariable String username){
-        if (!request.getUsername().equals(username)) {
-            throw new BadRequestException("Username doesn't match");
-        }
+    @RequestMapping(method = RequestMethod.POST, value ="/password/reset")
+    //TODO fix endpoint
+    public void generatePasswordReset(@RequestBody PasswordResetRequest request, @PathVariable String username,
+                                      @PathVariable String token){
 
         usersService.generatePasswordReset(request.getUsername(), request.getMail());
     }
 
-    @RequestMapping(method = RequestMethod.POST, value ="/{username}")
+    @RequestMapping(method = RequestMethod.POST, value ="/password/reset/confirm") //TODO fix endpoint
     public void activatePasswordReset(@RequestBody PasswordResetConfirmRequest request, @PathVariable String username){
-        if (!request.getUsername().equals(username)) {
-            throw new BadRequestException("Username doesn't match");
-        }
 
         usersService.activatePasswordReset(request.getUsername(), request.getToken());
     }

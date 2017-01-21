@@ -5,7 +5,6 @@ import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dao.KrbException;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.dto.User;
-import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
 import pl.memleak.panel.bll.exceptions.OperationNotPermittedException;
 import pl.memleak.panel.bll.mail.PasswordRequestMailBuilder;
 import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
@@ -133,13 +132,13 @@ public class UsersService implements IUsersService {
     @Override
     public void generatePasswordReset(String username, String mail) {
         User user = ldapDao.getUser(username);
-        if ( !mail.equals(user.getEmail()) ){
-            throw new EntityNotFoundException("Mail doesn't match");
+        try {
+            passwordRequestMailBuilder.setToken(generateToken());
+            passwordRequestMailBuilder.setUser(user);
+            mailService.sendMail(passwordRequestMailBuilder.build());
+        } catch (RuntimeException e){
+            throw new OperationNotPermittedException(e.getMessage());
         }
-
-        passwordRequestMailBuilder.setToken(generateToken());
-        passwordRequestMailBuilder.setUser(user);
-        mailService.sendMail(passwordRequestMailBuilder.build());
     }
 
     @Override
