@@ -9,7 +9,6 @@ public class RandomSequenceGenerator {
      private static Random random = new Random();
 
     static public String generate(int n, String allowedSigns){
-        @SuppressWarnings("SpellCheckingInspection")
         char[] chars = allowedSigns.toCharArray();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < n; i++) {
