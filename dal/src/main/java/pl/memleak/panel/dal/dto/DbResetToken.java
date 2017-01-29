@@ -1,5 +1,7 @@
 package pl.memleak.panel.dal.dto;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.sql.Date;
@@ -7,13 +9,18 @@ import java.sql.Date;
 /**
  * Created by wigdis on 15.01.17.
  */
+@Entity
 public class DbResetToken {
 
     @Id
     @GeneratedValue
     private Integer id;
     private String token;
+
+    @Column(columnDefinition = "user_dn")
     private String userDn;
+
+    @Column(columnDefinition = "expiration_date")
     private Date expirationDate;
 
     public DbResetToken(String token, String userDn, Date expirationDate) {
