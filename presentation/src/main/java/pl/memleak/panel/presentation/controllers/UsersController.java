@@ -138,12 +138,19 @@ public class UsersController {
             usersService.generatePasswordReset(request.getUsername(), request.getMail());
         } catch(OperationNotPermittedException e){
             throw new ForbiddenException(e);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
         }
     }
 
     @RequestMapping(method = RequestMethod.POST, value ="/password/reset/confirm")
     public void activatePasswordReset(@RequestBody PasswordResetConfirmRequest request){
-
-        usersService.activatePasswordReset(request.getUsername(), request.getToken());
+        try {
+            usersService.activatePasswordReset(request.getUsername(), request.getToken());
+        } catch(OperationNotPermittedException e){
+            throw new ForbiddenException(e);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        }
     }
 }

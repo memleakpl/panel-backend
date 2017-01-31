@@ -2,6 +2,7 @@ package pl.memleak.panel.bll.services;
 
 import pl.memleak.panel.bll.dao.IKrbDao;
 import pl.memleak.panel.bll.dao.ILdapDao;
+import pl.memleak.panel.bll.dao.IResetTokenDao;
 import pl.memleak.panel.bll.dao.KrbException;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.dto.User;
@@ -10,6 +11,8 @@ import pl.memleak.panel.bll.mail.PasswordRequestMailBuilder;
 import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
 import pl.memleak.panel.bll.utils.RandomSequenceGenerator;
 
+import javax.xml.crypto.Data;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +22,7 @@ import java.util.stream.Collectors;
 public class UsersService implements IUsersService {
     private final ILdapDao ldapDao;
     private final IKrbDao krbDao;
+    private final IResetTokenDao resetTokenDao;
     private final IMailService mailService;
     private final UserCreatedMailBuilder userCreatedMailBuilder;
     private final PasswordRequestMailBuilder passwordRequestMailBuilder;
@@ -27,11 +31,12 @@ public class UsersService implements IUsersService {
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
     private static final String TOKEN_PATTERN = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
-    public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IMailService mailService,
+    public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IResetTokenDao resetTokenDao, IMailService mailService,
                         UserCreatedMailBuilder userCreatedMailBuilder,
                         PasswordRequestMailBuilder passwordRequestMailBuilder, String adminGroupName) {
         this.ldapDao = ldapDao;
         this.krbDao = krbDao;
+        this.resetTokenDao = resetTokenDao;
         this.mailService = mailService;
         this.userCreatedMailBuilder = userCreatedMailBuilder;
         this.passwordRequestMailBuilder = passwordRequestMailBuilder;
@@ -130,19 +135,30 @@ public class UsersService implements IUsersService {
     }
 
     @Override
-    public void generatePasswordReset(String username, String mail) {
+    public void generatePasswordReset(String username, String email) {
         User user = ldapDao.getUser(username);
-        try {
-            passwordRequestMailBuilder.setToken(generateToken());
-            passwordRequestMailBuilder.setUser(user);
-            mailService.sendMail(passwordRequestMailBuilder.build());
-        } catch (RuntimeException e){
-            throw new OperationNotPermittedException(e.getMessage());
-        }
+        if(!user.getEmail().equals(email)) throw new OperationNotPermittedException("Email mismatch");
+
+        final String token = generateToken();
+
+        resetTokenDao.addToken(user.getUsername(), token, LocalDateTime.now().plusHours(1));
+
+        passwordRequestMailBuilder.setToken(token);
+        passwordRequestMailBuilder.setUser(user);
+        mailService.sendMail(passwordRequestMailBuilder.build());
     }
 
     @Override
     public void activatePasswordReset(String username, String token) {
+        User user = ldapDao.getUser(username);
+        final String tokenFromDb = resetTokenDao.getToken(user.getUsername(), LocalDateTime.now());
 
+        if(!token.equals(tokenFromDb)) throw new OperationNotPermittedException("Wrong token");
+
+        try {
+            krbDao.changePassword(user.getUsername(),  generatePassword());
+        } catch (KrbException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
