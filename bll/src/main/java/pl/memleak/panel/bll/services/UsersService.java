@@ -6,6 +6,7 @@ import pl.memleak.panel.bll.dao.KrbException;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.bll.exceptions.OperationNotPermittedException;
+import pl.memleak.panel.bll.mail.NewPasswordMailBuilder;
 import pl.memleak.panel.bll.mail.PasswordRequestMailBuilder;
 import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
 import pl.memleak.panel.bll.utils.RandomSequenceGenerator;
@@ -22,6 +23,7 @@ public class UsersService implements IUsersService {
     private final IMailService mailService;
     private final UserCreatedMailBuilder userCreatedMailBuilder;
     private final PasswordRequestMailBuilder passwordRequestMailBuilder;
+    private final NewPasswordMailBuilder newPasswordMailBuilder;
     private final String adminGroupName;
     private static final String PASSWORD_PATTERN =
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
@@ -29,12 +31,15 @@ public class UsersService implements IUsersService {
 
     public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IMailService mailService,
                         UserCreatedMailBuilder userCreatedMailBuilder,
-                        PasswordRequestMailBuilder passwordRequestMailBuilder, String adminGroupName) {
+                        PasswordRequestMailBuilder passwordRequestMailBuilder,
+                        NewPasswordMailBuilder newPasswordMailBuilder,
+                        String adminGroupName) {
         this.ldapDao = ldapDao;
         this.krbDao = krbDao;
         this.mailService = mailService;
         this.userCreatedMailBuilder = userCreatedMailBuilder;
         this.passwordRequestMailBuilder = passwordRequestMailBuilder;
+        this.newPasswordMailBuilder = newPasswordMailBuilder;
         this.adminGroupName = adminGroupName;
     }
 
@@ -133,8 +138,10 @@ public class UsersService implements IUsersService {
     public void generatePasswordReset(String username, String mail) {
         User user = ldapDao.getUser(username);
         try {
-            passwordRequestMailBuilder.setToken(generateToken());
+            String token = generateToken();
+            passwordRequestMailBuilder.setToken(token);
             passwordRequestMailBuilder.setUser(user);
+            // TODO save token in db
             mailService.sendMail(passwordRequestMailBuilder.build());
         } catch (RuntimeException e){
             throw new OperationNotPermittedException(e.getMessage());
@@ -143,6 +150,15 @@ public class UsersService implements IUsersService {
 
     @Override
     public void activatePasswordReset(String username, String token) {
-
+        User user = ldapDao.getUser(username);
+        try{
+            // TODO valid token: get it from db, check user and date
+            String password = generatePassword();
+            newPasswordMailBuilder.setUser(user);
+            newPasswordMailBuilder.setPassword(password);
+            mailService.sendMail(newPasswordMailBuilder.build());
+        } catch (RuntimeException e) {
+            throw new OperationNotPermittedException(e.getMessage());
+        }
     }
 }
