@@ -7,11 +7,11 @@ import pl.memleak.panel.bll.dao.KrbException;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.bll.exceptions.OperationNotPermittedException;
+import pl.memleak.panel.bll.mail.NewPasswordMailBuilder;
 import pl.memleak.panel.bll.mail.PasswordRequestMailBuilder;
 import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
 import pl.memleak.panel.bll.utils.RandomSequenceGenerator;
 
-import javax.xml.crypto.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,6 +26,7 @@ public class UsersService implements IUsersService {
     private final IMailService mailService;
     private final UserCreatedMailBuilder userCreatedMailBuilder;
     private final PasswordRequestMailBuilder passwordRequestMailBuilder;
+    private final NewPasswordMailBuilder newPasswordMailBuilder;
     private final String adminGroupName;
     private static final String PASSWORD_PATTERN =
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
@@ -33,13 +34,14 @@ public class UsersService implements IUsersService {
 
     public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IResetTokenDao resetTokenDao, IMailService mailService,
                         UserCreatedMailBuilder userCreatedMailBuilder,
-                        PasswordRequestMailBuilder passwordRequestMailBuilder, String adminGroupName) {
+                        PasswordRequestMailBuilder passwordRequestMailBuilder, NewPasswordMailBuilder newPasswordMailBuilder, String adminGroupName) {
         this.ldapDao = ldapDao;
         this.krbDao = krbDao;
         this.resetTokenDao = resetTokenDao;
         this.mailService = mailService;
         this.userCreatedMailBuilder = userCreatedMailBuilder;
         this.passwordRequestMailBuilder = passwordRequestMailBuilder;
+        this.newPasswordMailBuilder = newPasswordMailBuilder;
         this.adminGroupName = adminGroupName;
     }
 
@@ -149,14 +151,19 @@ public class UsersService implements IUsersService {
     }
 
     @Override
-    public void activatePasswordReset(String username, String token) {
+    public void activatePasswordReset(String token) {
+        final String username = resetTokenDao.getToken(token, LocalDateTime.now())
+                .orElseThrow(() -> new OperationNotPermittedException("Wrong token"));
+
         User user = ldapDao.getUser(username);
-        final String tokenFromDb = resetTokenDao.getToken(user.getUsername(), LocalDateTime.now());
 
-        if(!token.equals(tokenFromDb)) throw new OperationNotPermittedException("Wrong token");
-
+        final String password = generatePassword();
         try {
-            krbDao.changePassword(user.getUsername(),  generatePassword());
+            krbDao.changePassword(user.getUsername(), password);
+
+            newPasswordMailBuilder.setUser(user);
+            newPasswordMailBuilder.setPassword(password);
+            mailService.sendMail(newPasswordMailBuilder.build()); //TODO: invalidate token
         } catch (KrbException e) {
             throw new RuntimeException(e);
         }

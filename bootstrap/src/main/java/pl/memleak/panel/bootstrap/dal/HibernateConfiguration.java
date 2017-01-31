@@ -11,8 +11,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import pl.meleak.panel.infrastructure.mail.IMailDao;
+import pl.memleak.panel.bll.dao.IResetTokenDao;
 import pl.memleak.panel.dal.dao.MailDao;
+import pl.memleak.panel.dal.dao.ResetTokenDao;
 import pl.memleak.panel.dal.dto.DbMail;
+import pl.memleak.panel.dal.dto.DbResetToken;
 
 /**
  * Created by maxmati on 12/18/16
@@ -27,6 +30,11 @@ public class HibernateConfiguration {
     }
 
     @Bean
+    public IResetTokenDao resetTokenDao(@Qualifier(value = "sessionFactory") SessionFactory sessionFactory){
+        return new ResetTokenDao(sessionFactory);
+    }
+
+    @Bean
     public SessionFactory sessionFactory()
     {
         ServiceRegistry standardRegistry =
@@ -34,6 +42,7 @@ public class HibernateConfiguration {
 
         Metadata metadata = new MetadataSources( standardRegistry )
                 .addAnnotatedClass(DbMail.class)
+                .addAnnotatedClass(DbResetToken.class)
                 .getMetadataBuilder()
                 .applyImplicitNamingStrategy(ImplicitNamingStrategyJpaCompliantImpl.INSTANCE)
                 .build();

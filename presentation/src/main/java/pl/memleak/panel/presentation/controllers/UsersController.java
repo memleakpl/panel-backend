@@ -135,7 +135,7 @@ public class UsersController {
     @RequestMapping(method = RequestMethod.POST, value ="/password/reset")
     public void generatePasswordReset(@RequestBody PasswordResetRequest request) {
         try {
-            usersService.generatePasswordReset(request.getUsername(), request.getMail());
+            usersService.generatePasswordReset(request.getUsername(), request.getEmail());
         } catch(OperationNotPermittedException e){
             throw new ForbiddenException(e);
         } catch (EntityNotFoundException e) {
@@ -146,7 +146,7 @@ public class UsersController {
     @RequestMapping(method = RequestMethod.POST, value ="/password/reset/confirm")
     public void activatePasswordReset(@RequestBody PasswordResetConfirmRequest request){
         try {
-            usersService.activatePasswordReset(request.getUsername(), request.getToken());
+            usersService.activatePasswordReset(request.getToken());
         } catch(OperationNotPermittedException e){
             throw new ForbiddenException(e);
         } catch (EntityNotFoundException e) {

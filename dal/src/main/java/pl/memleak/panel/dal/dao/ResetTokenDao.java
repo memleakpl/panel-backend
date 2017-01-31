@@ -3,50 +3,46 @@ package pl.memleak.panel.dal.dao;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import pl.meleak.panel.infrastructure.mail.MailJobDto;
-import pl.memleak.panel.dal.dto.DbMail;
-import pl.memleak.panel.dal.mapper.MailMapper;
+import org.hibernate.query.Query;
+import pl.memleak.panel.bll.dao.IResetTokenDao;
+import pl.memleak.panel.dal.dto.DbResetToken;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * Created by wigdis on 29.01.17.
  */
-public class ResetTokenDao {
+public class ResetTokenDao implements IResetTokenDao {
     private SessionFactory sessionFactory;
 
     public ResetTokenDao(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
 
-//    @Override
-//    public MailJobDto getById(int id) {
-//        final Session currentSession = sessionFactory.getCurrentSession();
-//
-//        Transaction tx = currentSession.beginTransaction();
-//        DbMail dbMail = currentSession.byId(DbMail.class).load(id);
-//        tx.commit();
-//
-//        return MailMapper.toMailJobDto(dbMail);
-//    }
-//
-//    @Override
-//    public int save(MailJobDto mailJobDto) {
-//        final Session currentSession = sessionFactory.getCurrentSession();
-//        DbMail dbMail = MailMapper.toDbMail(mailJobDto);
-//
-//        Transaction tx = currentSession.beginTransaction();
-//        int id = (int) currentSession.save(dbMail);
-//        tx.commit();
-//
-//        return id;
-//    }
-//
-//    @Override
-//    public void update(MailJobDto mailJobDto) {
-//        final Session currentSession = sessionFactory.getCurrentSession();
-//        DbMail dbMail = MailMapper.toDbMail(mailJobDto);
-//
-//        Transaction tx = currentSession.beginTransaction();
-//        currentSession.update(dbMail);
-//        tx.commit();
-//    }
+    @Override
+    public void addToken(String username, String token, LocalDateTime dueDate) { //TODO: username mapping
+        final Session currentSession = sessionFactory.getCurrentSession();
+        DbResetToken resetToken = new DbResetToken(token, username, dueDate);
+
+        Transaction tx = currentSession.beginTransaction();
+        currentSession.save(resetToken);
+        tx.commit();
+    }
+
+    @Override
+    public Optional<String> getToken(String token, LocalDateTime dueDate) { //TODO: username mapping
+        final Session currentSession = sessionFactory.getCurrentSession();
+
+        Transaction tx = currentSession.beginTransaction();
+        Query<DbResetToken> query = currentSession
+                .createQuery("FROM DbResetToken WHERE token = :token AND expirationDate > :dueDate",
+                        DbResetToken.class)
+                .setParameter("token", token)
+                .setParameter("dueDate", dueDate);
+        final Optional<String> userDn = query.list().stream().map(DbResetToken::getUserDn).findFirst();
+        tx.commit();
+        return userDn;
+
+    }
 }

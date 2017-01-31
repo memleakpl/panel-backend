@@ -3,7 +3,7 @@ package pl.memleak.panel.dal.dto;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 /**
  * Created by wigdis on 15.01.17.
@@ -16,9 +16,12 @@ public class DbResetToken {
     private Integer id;
     private String token;
     private String userDn;
-    private Date expirationDate;
+    private LocalDateTime expirationDate;
 
-    public DbResetToken(String token, String userDn, Date expirationDate) {
+    public DbResetToken() {
+    }
+
+    public DbResetToken(String token, String userDn, LocalDateTime expirationDate) {
         this.token = token;
         this.userDn = userDn;
         this.expirationDate = expirationDate;
@@ -48,11 +51,11 @@ public class DbResetToken {
         this.userDn = userDn;
     }
 
-    public Date getExpirationDate() {
+    public LocalDateTime getExpirationDate() {
         return expirationDate;
     }
 
-    public void setExpirationDate(Date expirationDate) {
+    public void setExpirationDate(LocalDateTime expirationDate) {
         this.expirationDate = expirationDate;
     }
 }
