@@ -4,6 +4,7 @@ import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.dto.User;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by maxmati on 11/29/16
@@ -44,4 +45,8 @@ public interface ILdapDao {
     void removeFromGroup(String groupname, String username);
 
     List<Group> getUserGroups(String username);
+
+    User getUserByDn(String dn);
+
+    String getUserDn(String username);
 }

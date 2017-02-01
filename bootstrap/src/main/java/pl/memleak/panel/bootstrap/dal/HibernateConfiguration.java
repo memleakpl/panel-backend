@@ -10,8 +10,11 @@ import org.hibernate.service.ServiceRegistry;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import pl.meleak.panel.infrastructure.mail.IMailDao;
+import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dao.IResetTokenDao;
+import pl.memleak.panel.dal.dao.LdapDao;
 import pl.memleak.panel.dal.dao.MailDao;
 import pl.memleak.panel.dal.dao.ResetTokenDao;
 import pl.memleak.panel.dal.dto.DbMail;
@@ -21,6 +24,7 @@ import pl.memleak.panel.dal.dto.DbResetToken;
  * Created by maxmati on 12/18/16
  */
 
+@Import({LdaptiveConfiguration.class})
 @Configuration
 public class HibernateConfiguration {
 
@@ -30,8 +34,10 @@ public class HibernateConfiguration {
     }
 
     @Bean
-    public IResetTokenDao resetTokenDao(@Qualifier(value = "sessionFactory") SessionFactory sessionFactory){
-        return new ResetTokenDao(sessionFactory);
+    public IResetTokenDao resetTokenDao(
+            @Qualifier(value = "sessionFactory") SessionFactory sessionFactory,
+            @Qualifier(value = "ldapDao") ILdapDao ldapDao){
+        return new ResetTokenDao(sessionFactory, ldapDao);
     }
 
     @Bean

@@ -4,6 +4,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dao.IResetTokenDao;
 import pl.memleak.panel.dal.dto.DbResetToken;
 
@@ -14,16 +15,19 @@ import java.util.Optional;
  * Created by wigdis on 29.01.17.
  */
 public class ResetTokenDao implements IResetTokenDao {
-    private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
+    private final ILdapDao ldapDao;
 
-    public ResetTokenDao(SessionFactory sessionFactory) {
+    public ResetTokenDao(SessionFactory sessionFactory, ILdapDao ldapDao) {
         this.sessionFactory = sessionFactory;
+        this.ldapDao = ldapDao;
     }
 
     @Override
-    public void addToken(String username, String token, LocalDateTime dueDate) { //TODO: username mapping
+    public void addToken(String username, String token, LocalDateTime dueDate) {
+        String userDn = ldapDao.getUserDn(username);
         final Session currentSession = sessionFactory.getCurrentSession();
-        DbResetToken resetToken = new DbResetToken(token, username, dueDate);
+        DbResetToken resetToken = new DbResetToken(token, userDn, dueDate);
 
         Transaction tx = currentSession.beginTransaction();
         currentSession.save(resetToken);
@@ -31,7 +35,7 @@ public class ResetTokenDao implements IResetTokenDao {
     }
 
     @Override
-    public Optional<String> getToken(String token, LocalDateTime dueDate) { //TODO: username mapping
+    public Optional<String> getToken(String token, LocalDateTime dueDate) {
         final Session currentSession = sessionFactory.getCurrentSession();
 
         Transaction tx = currentSession.beginTransaction();
@@ -42,7 +46,7 @@ public class ResetTokenDao implements IResetTokenDao {
                 .setParameter("dueDate", dueDate);
         final Optional<String> userDn = query.list().stream().map(DbResetToken::getUserDn).findFirst();
         tx.commit();
-        return userDn;
+        return userDn.map(s -> ldapDao.getUserByDn(s).getUsername());
 
     }
 
