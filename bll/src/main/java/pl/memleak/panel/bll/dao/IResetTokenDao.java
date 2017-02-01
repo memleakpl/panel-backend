@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface IResetTokenDao {
     void addToken(String username, String token, LocalDateTime dueDate);
     Optional<String> getToken(String username, LocalDateTime dueDate);
+    void removeToken(String token);
 }

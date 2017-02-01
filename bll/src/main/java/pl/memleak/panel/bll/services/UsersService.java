@@ -163,7 +163,8 @@ public class UsersService implements IUsersService {
 
             newPasswordMailBuilder.setUser(user);
             newPasswordMailBuilder.setPassword(password);
-            mailService.sendMail(newPasswordMailBuilder.build()); //TODO: invalidate token
+            mailService.sendMail(newPasswordMailBuilder.build());
+            resetTokenDao.removeToken(token);
         } catch (KrbException e) {
             throw new RuntimeException(e);
         }

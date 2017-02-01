@@ -45,4 +45,15 @@ public class ResetTokenDao implements IResetTokenDao {
         return userDn;
 
     }
+
+    @Override
+    public void removeToken(String token) {
+        final Session currentSession = sessionFactory.getCurrentSession();
+
+        Transaction tx = currentSession.beginTransaction();
+        currentSession.createQuery("DELETE DbResetToken WHERE token = :token")
+                .setParameter("token", token)
+                .executeUpdate();
+        tx.commit();
+    }
 }
