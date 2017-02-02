@@ -68,6 +68,6 @@ public class MailConfiguration {
     public NewPasswordMailBuilder newPasswordMailBuilder() {
         return new NewPasswordMailBuilder(
                 env.getProperty("envelope.sender"),
-                env.getProperty("envelope.createUserSubject"));
+                env.getProperty("envelope.newPasswordSubject"));
     }
 }

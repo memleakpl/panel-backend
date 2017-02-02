@@ -5,12 +5,7 @@ package pl.memleak.panel.presentation.dto;
  */
 public class PasswordResetRequest {
     private String username;
-    private String mail;
-
-    public PasswordResetRequest(String username, String mail) {
-        this.username = username;
-        this.mail = mail;
-    }
+    private String email;
 
     public String getUsername() {
         return username;
@@ -20,11 +15,11 @@ public class PasswordResetRequest {
         this.username = username;
     }
 
-    public String getMail() {
-        return mail;
+    public String getEmail() {
+        return email;
     }
 
-    public void setMail(String mail) {
-        this.mail = mail;
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

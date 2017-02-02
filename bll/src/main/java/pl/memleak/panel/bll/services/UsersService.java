@@ -2,6 +2,7 @@ package pl.memleak.panel.bll.services;
 
 import pl.memleak.panel.bll.dao.IKrbDao;
 import pl.memleak.panel.bll.dao.ILdapDao;
+import pl.memleak.panel.bll.dao.IResetTokenDao;
 import pl.memleak.panel.bll.dao.KrbException;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.dto.User;
@@ -11,6 +12,7 @@ import pl.memleak.panel.bll.mail.PasswordRequestMailBuilder;
 import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
 import pl.memleak.panel.bll.utils.RandomSequenceGenerator;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class UsersService implements IUsersService {
     private final ILdapDao ldapDao;
     private final IKrbDao krbDao;
+    private final IResetTokenDao resetTokenDao;
     private final IMailService mailService;
     private final UserCreatedMailBuilder userCreatedMailBuilder;
     private final PasswordRequestMailBuilder passwordRequestMailBuilder;
@@ -29,13 +32,12 @@ public class UsersService implements IUsersService {
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()";
     private static final String TOKEN_PATTERN = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
-    public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IMailService mailService,
+    public UsersService(ILdapDao ldapDao, IKrbDao krbDao, IResetTokenDao resetTokenDao, IMailService mailService,
                         UserCreatedMailBuilder userCreatedMailBuilder,
-                        PasswordRequestMailBuilder passwordRequestMailBuilder,
-                        NewPasswordMailBuilder newPasswordMailBuilder,
-                        String adminGroupName) {
+                        PasswordRequestMailBuilder passwordRequestMailBuilder, NewPasswordMailBuilder newPasswordMailBuilder, String adminGroupName) {
         this.ldapDao = ldapDao;
         this.krbDao = krbDao;
+        this.resetTokenDao = resetTokenDao;
         this.mailService = mailService;
         this.userCreatedMailBuilder = userCreatedMailBuilder;
         this.passwordRequestMailBuilder = passwordRequestMailBuilder;
@@ -135,30 +137,36 @@ public class UsersService implements IUsersService {
     }
 
     @Override
-    public void generatePasswordReset(String username, String mail) {
+    public void generatePasswordReset(String username, String email) {
         User user = ldapDao.getUser(username);
-        try {
-            String token = generateToken();
-            passwordRequestMailBuilder.setToken(token);
-            passwordRequestMailBuilder.setUser(user);
-            // TODO save token in db
-            mailService.sendMail(passwordRequestMailBuilder.build());
-        } catch (RuntimeException e){
-            throw new OperationNotPermittedException(e.getMessage());
-        }
+        if(!user.getEmail().equals(email)) throw new OperationNotPermittedException("Email mismatch");
+
+        final String token = generateToken();
+
+        resetTokenDao.addToken(user.getUsername(), token, LocalDateTime.now().plusHours(1));
+
+        passwordRequestMailBuilder.setToken(token);
+        passwordRequestMailBuilder.setUser(user);
+        mailService.sendMail(passwordRequestMailBuilder.build());
     }
 
     @Override
-    public void activatePasswordReset(String username, String token) {
+    public void activatePasswordReset(String token) {
+        final String username = resetTokenDao.getToken(token, LocalDateTime.now())
+                .orElseThrow(() -> new OperationNotPermittedException("Wrong token"));
+
         User user = ldapDao.getUser(username);
-        try{
-            // TODO valid token: get it from db, check user and date
-            String password = generatePassword();
+
+        final String password = generatePassword();
+        try {
+            krbDao.changePassword(user.getUsername(), password);
+
             newPasswordMailBuilder.setUser(user);
             newPasswordMailBuilder.setPassword(password);
             mailService.sendMail(newPasswordMailBuilder.build());
-        } catch (RuntimeException e) {
-            throw new OperationNotPermittedException(e.getMessage());
+            resetTokenDao.removeToken(token);
+        } catch (KrbException e) {
+            throw new RuntimeException(e);
         }
     }
 }

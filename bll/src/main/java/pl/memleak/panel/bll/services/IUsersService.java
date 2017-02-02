@@ -27,5 +27,5 @@ public interface IUsersService {
 
     void generatePasswordReset(String username, String mail);
 
-    void activatePasswordReset(String username, String token);
+    void activatePasswordReset(String token);
 }

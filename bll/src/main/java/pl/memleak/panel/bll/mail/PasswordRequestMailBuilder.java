@@ -36,7 +36,8 @@ public class PasswordRequestMailBuilder implements MailBuilder{
     }
 
     private String formatMessage(String name, String address, String token) {
-        return String.format("Hello %s, if you want to reset your password, click here:. %s%s" +
-                "If you haven't been trying to change your password, ignore this message.", name, address, token);
+        final String url = String.format(address, token);
+        return String.format("Hello %s, if you want to reset your password, click here:. %s\n" +
+                "If you haven't been trying to change your password, ignore this message.", name, url);
     }
 }

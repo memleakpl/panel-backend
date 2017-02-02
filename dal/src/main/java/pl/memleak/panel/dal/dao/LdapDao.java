@@ -19,6 +19,7 @@ import pl.memleak.panel.dal.mapper.UserMapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class LdapDao implements ILdapDao {
@@ -65,10 +66,12 @@ public class LdapDao implements ILdapDao {
         return ldapUsers.stream().map(UserMapper::toUser).collect(Collectors.toList());
     }
 
+    @Override
     public List<Group> getAllGroups() {
         return getAllGroups(ldapConfig.getDefaultGroupBaseDn());
     }
 
+    @Override
     public List<Group> getAllGroups(String baseDn) {
         SearchFilter groupFilter = new SearchFilter(ldapConfig.getAllGroupsFilter());
         List<LdapGroup> ldapGroups = query(baseDn, groupFilter, LdapGroup.class);
@@ -230,6 +233,29 @@ public class LdapDao implements ILdapDao {
         return groups.stream().map(GroupMapper::toGroup).collect(Collectors.toList());
     }
 
+    @Override
+    public User getUserByDn(String dn) {
+        final SearchFilter filter = new SearchFilter(ldapConfig.getAllUsersFilter());
+        Optional<LdapUser> user = query(dn, filter, LdapUser.class).stream().findFirst();
+        return user.map(UserMapper::toUser).orElseThrow(EntityNotFoundException::new);
+    }
+
+    @Override
+    public String getUserDn(String username) {
+        return getRawUser(username).getDistinguishedName();
+    }
+
+    @Override
+    public Group getGroup(String baseDn, String groupname){
+        LdapGroup ldapGroup = getRawGroup(baseDn, groupname);
+        return GroupMapper.toGroup(ldapGroup);
+    }
+
+    @Override
+    public Group getGroup(String groupname){
+        return getGroup(ldapConfig.getDefaultGroupBaseDn(), groupname);
+    }
+
     private void editGroupMembership(LdapGroup group, LdapUser user, AttributeModificationType operationType)
             throws LdapException {
         try(Connection conn = connectionFactory.getConnection()) {
@@ -241,15 +267,6 @@ public class LdapDao implements ILdapDao {
             ModifyOperation modifyOperation = new ModifyOperation(conn);
             modifyOperation.execute(modifyRequest);
         }
-    }
-
-    public Group getGroup(String baseDn, String groupname){
-        LdapGroup ldapGroup = getRawGroup(baseDn, groupname);
-        return GroupMapper.toGroup(ldapGroup);
-    }
-
-    public Group getGroup(String groupname){
-        return getGroup(ldapConfig.getDefaultGroupBaseDn(), groupname);
     }
 
     private LdapGroup getRawGroup(String groupname) {
