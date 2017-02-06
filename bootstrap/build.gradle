@@ -20,12 +20,12 @@ apply plugin: 'war'
 
 jar {
 	baseName = 'panel'
-	version = '0.0.2-SNAPSHOT'
+	version = '1.0.0-SNAPSHOT'
 }
 
 war {
 	baseName = 'panel'
-	version = '0.0.2-SNAPSHOT'
+	version = '1.0.0-SNAPSHOT'
 }
 
 sourceCompatibility = 1.8
