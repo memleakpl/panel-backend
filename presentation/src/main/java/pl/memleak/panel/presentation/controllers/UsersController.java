@@ -2,8 +2,6 @@ package pl.memleak.panel.presentation.controllers;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import pl.memleak.panel.bll.dto.ChangePasswordRequest;
@@ -11,8 +9,10 @@ import pl.memleak.panel.bll.dto.User;
 import pl.memleak.panel.bll.exceptions.EntityNotFoundException;
 import pl.memleak.panel.bll.exceptions.OperationNotPermittedException;
 import pl.memleak.panel.bll.services.IUsersService;
-import pl.memleak.panel.presentation.dto.UserRequest;
 import pl.memleak.panel.presentation.dto.IsAdminResponse;
+import pl.memleak.panel.presentation.dto.PasswordResetConfirmRequest;
+import pl.memleak.panel.presentation.dto.PasswordResetRequest;
+import pl.memleak.panel.presentation.dto.UserRequest;
 import pl.memleak.panel.presentation.exceptions.BadRequestException;
 import pl.memleak.panel.presentation.exceptions.ForbiddenException;
 import pl.memleak.panel.presentation.exceptions.NotFoundException;
@@ -104,7 +104,7 @@ public class UsersController {
         usersService.changePassword(username, changePasswordRequest.getNewPassword());
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value="/{username}")
+    @RequestMapping(method = RequestMethod.PUT, value = "/{username}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void editUser(
             @RequestBody @Valid UserRequest user,
@@ -130,5 +130,27 @@ public class UsersController {
         IsAdminResponse response = new IsAdminResponse();
         response.setAdmin(usersService.isAdmin(getCurrentUser()));
         return response;
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value ="/password/reset")
+    public void generatePasswordReset(@RequestBody PasswordResetRequest request) {
+        try {
+            usersService.generatePasswordReset(request.getUsername(), request.getEmail());
+        } catch(OperationNotPermittedException e){
+            throw new ForbiddenException(e);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value ="/password/reset/confirm")
+    public void activatePasswordReset(@RequestBody PasswordResetConfirmRequest request){
+        try {
+            usersService.activatePasswordReset(request.getToken());
+        } catch(OperationNotPermittedException e){
+            throw new ForbiddenException(e);
+        } catch (EntityNotFoundException e) {
+            throw new NotFoundException(e);
+        }
     }
 }
