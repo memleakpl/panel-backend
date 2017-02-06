@@ -2,6 +2,7 @@ package pl.memleak.panel.dal.dto;
 
 import org.ldaptive.beans.Attribute;
 import org.ldaptive.beans.Entry;
+
 /**
  * Created by Kamil on 19.11.2016.
  */

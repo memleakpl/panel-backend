@@ -11,6 +11,8 @@ import pl.meleak.panel.infrastructure.mail.IMailDao;
 import pl.meleak.panel.infrastructure.mail.MailConfig;
 import pl.meleak.panel.infrastructure.mail.MailExecutor;
 import pl.meleak.panel.infrastructure.mail.MailService;
+import pl.memleak.panel.bll.mail.NewPasswordMailBuilder;
+import pl.memleak.panel.bll.mail.PasswordRequestMailBuilder;
 import pl.memleak.panel.bll.mail.UserCreatedMailBuilder;
 import pl.memleak.panel.bootstrap.dal.HibernateConfiguration;
 
@@ -52,5 +54,20 @@ public class MailConfiguration {
         return new UserCreatedMailBuilder(
                 env.getProperty("envelope.sender"),
                 env.getProperty("envelope.createUserSubject"));
+    }
+
+    @Bean
+    public PasswordRequestMailBuilder passwordRequestMailBuilder() {
+        return new PasswordRequestMailBuilder(
+                env.getProperty("envelope.sender"),
+                env.getProperty("envelope.passwordResetRequestSubject"),
+                env.getProperty("envelope.passwordResetAddress"));
+    }
+
+    @Bean
+    public NewPasswordMailBuilder newPasswordMailBuilder() {
+        return new NewPasswordMailBuilder(
+                env.getProperty("envelope.sender"),
+                env.getProperty("envelope.newPasswordSubject"));
     }
 }

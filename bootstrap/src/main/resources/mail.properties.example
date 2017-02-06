@@ -6,3 +6,6 @@ smtp.username=memleak
 smtp.password=password
 envelope.sender=panel@memleak.pl
 envelope.createUserSubject=Account created
+envelope.passwordResetRequestSubject=Password reset request
+envelope.newPasswordSubject=New password
+envelope.passwordResetAddress=http://localhost:3000/login?token=%s

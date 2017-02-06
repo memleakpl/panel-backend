@@ -9,6 +9,7 @@ import org.ldaptive.beans.reflect.DefaultLdapEntryMapper;
 import pl.memleak.panel.bll.dao.ILdapDao;
 import pl.memleak.panel.bll.dto.Group;
 import pl.memleak.panel.bll.dto.User;
+import pl.memleak.panel.bll.exceptions.GroupModifyException;
 import pl.memleak.panel.dal.configuration.LdapConfig;
 import pl.memleak.panel.dal.dto.LdapGroup;
 import pl.memleak.panel.dal.dto.LdapUser;
@@ -18,6 +19,7 @@ import pl.memleak.panel.dal.mapper.UserMapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class LdapDao implements ILdapDao {
@@ -64,10 +66,12 @@ public class LdapDao implements ILdapDao {
         return ldapUsers.stream().map(UserMapper::toUser).collect(Collectors.toList());
     }
 
+    @Override
     public List<Group> getAllGroups() {
         return getAllGroups(ldapConfig.getDefaultGroupBaseDn());
     }
 
+    @Override
     public List<Group> getAllGroups(String baseDn) {
         SearchFilter groupFilter = new SearchFilter(ldapConfig.getAllGroupsFilter());
         List<LdapGroup> ldapGroups = query(baseDn, groupFilter, LdapGroup.class);
@@ -101,7 +105,7 @@ public class LdapDao implements ILdapDao {
         LdapUser oldLdapUser = getRawUser(user.getUsername());
         LdapUser newLdapUser = UserMapper.ldapUserUpdate(user, oldLdapUser);
 
-        AttributeModification[] attributeModifications = createModificationsArray(newLdapUser, oldLdapUser);
+        AttributeModification[] attributeModifications = createUserModificationsArray(newLdapUser, oldLdapUser);
 
         if (attributeModifications.length == 0) return;
 
@@ -120,8 +124,12 @@ public class LdapDao implements ILdapDao {
 
     @Override
     public void deleteUser(String username) {
-        LdapUser toDelete = getRawUser(username);
-        deleteEntity(toDelete.getDistinguishedName());
+        try {
+            LdapUser toDelete = getRawUser(username);
+            deleteEntity(toDelete.getDistinguishedName());
+        } catch (EntityNotFoundException e) {
+            //ignore user already deleted
+        }
     }
 
     private void deleteEntity(String dn) {
@@ -154,15 +162,117 @@ public class LdapDao implements ILdapDao {
 
     @Override
     public void deleteGroup(String groupname) {
-        LdapGroup toDelete = getGroup(groupname);
-        deleteEntity(toDelete.getDistinguishedName());
+        try {
+            LdapGroup toDelete = getRawGroup(groupname);
+            deleteEntity(toDelete.getDistinguishedName());
+        } catch (EntityNotFoundException e) {
+            //ignore user already deleted
+        }
     }
 
-    public LdapGroup getGroup(String groupname) {
+    @Override
+    public void editGroup(Group group) {
+        LdapUser newOwner = getRawUser(group.getOwner());
+        LdapGroup oldLdapGroup = getRawGroup(group.getName());
+        LdapGroup newLdapGroup = GroupMapper.ldapGroupUpdate(group, newOwner, oldLdapGroup);
+
+
+        AttributeModification[] attributeModifications = createGroupModificationsArray(newLdapGroup, oldLdapGroup);
+
+        if (attributeModifications.length == 0) return;
+
+        try (Connection connection = connectionFactory.getConnection()) {
+            connection.open();
+
+            ModifyRequest modifyRequest = new ModifyRequest(newLdapGroup.getDistinguishedName(),
+                    attributeModifications);
+
+            ModifyOperation modify = new ModifyOperation(connection);
+            modify.execute(modifyRequest);
+        } catch(LdapException e){
+            throw new GroupModifyException("Cannot edit group", e);
+        }
+    }
+
+    @Override
+    public void addToGroup(String groupname, String username) {
+        LdapGroup group = getRawGroup(groupname);
+        LdapUser user = getRawUser(username);
+
+        try {
+            editGroupMembership(group, user, AttributeModificationType.ADD);
+        } catch (LdapException e) {
+            throw new GroupModifyException("Cannot add user to group", e);
+        }
+    }
+
+    @Override
+    public void removeFromGroup(String groupname, String username) {
+        LdapGroup group = getRawGroup(groupname);
+        LdapUser user = getRawUser(username);
+
+        List<String> newGroupMembers = group.getMembers();
+        newGroupMembers.remove(user.getDistinguishedName());
+        if(newGroupMembers.isEmpty()){
+            deleteEntity(group.getDistinguishedName());
+            return;
+        }
+        try {
+            editGroupMembership(group, user, AttributeModificationType.REMOVE);
+        } catch (LdapException e) {
+            throw new GroupModifyException("Cannot delete user from group", e);
+        }
+    }
+
+    @Override
+    public List<Group> getUserGroups(String username) {
+        LdapUser user = getRawUser(username);
+        SearchFilter groupMemberFilter = new SearchFilter(ldapConfig.getGroupMemberFilter());
+        groupMemberFilter.setParameter("dn", user.getDistinguishedName());
+        List<LdapGroup> groups = query(ldapConfig.getDefaultGroupBaseDn(), groupMemberFilter, LdapGroup.class);
+        return groups.stream().map(GroupMapper::toGroup).collect(Collectors.toList());
+    }
+
+    @Override
+    public User getUserByDn(String dn) {
+        final SearchFilter filter = new SearchFilter(ldapConfig.getAllUsersFilter());
+        Optional<LdapUser> user = query(dn, filter, LdapUser.class).stream().findFirst();
+        return user.map(UserMapper::toUser).orElseThrow(EntityNotFoundException::new);
+    }
+
+    @Override
+    public String getUserDn(String username) {
+        return getRawUser(username).getDistinguishedName();
+    }
+
+    @Override
+    public Group getGroup(String baseDn, String groupname){
+        LdapGroup ldapGroup = getRawGroup(baseDn, groupname);
+        return GroupMapper.toGroup(ldapGroup);
+    }
+
+    @Override
+    public Group getGroup(String groupname){
         return getGroup(ldapConfig.getDefaultGroupBaseDn(), groupname);
     }
 
-    public LdapGroup getGroup(String baseDn, String groupname) {
+    private void editGroupMembership(LdapGroup group, LdapUser user, AttributeModificationType operationType)
+            throws LdapException {
+        try(Connection conn = connectionFactory.getConnection()) {
+            conn.open();
+            AttributeModification attributeModification = new AttributeModification(
+                    operationType,
+                    new LdapAttribute("member", user.getDistinguishedName()));
+            ModifyRequest modifyRequest = new ModifyRequest(group.getDistinguishedName(), attributeModification);
+            ModifyOperation modifyOperation = new ModifyOperation(conn);
+            modifyOperation.execute(modifyRequest);
+        }
+    }
+
+    private LdapGroup getRawGroup(String groupname) {
+        return getRawGroup(ldapConfig.getDefaultGroupBaseDn(), groupname);
+    }
+    private LdapGroup getRawGroup(String baseDn, String groupname) {
         SearchFilter groupFilter = new SearchFilter(ldapConfig.getCnFilter());
         groupFilter.setParameter("cn", groupname);
         return query(baseDn, groupFilter, LdapGroup.class).stream()
@@ -215,7 +325,22 @@ public class LdapDao implements ILdapDao {
                 new LdapAttribute(attribute, value));
     }
 
-    private AttributeModification[] createModificationsArray(LdapUser newLdapUser, LdapUser oldLdapUser){
+    private AttributeModification[] createGroupModificationsArray(LdapGroup newLdapGroup, LdapGroup oldLdapGroup){
+
+        List<AttributeModification> modsList = new ArrayList<>();
+
+        if( !newLdapGroup.getDescription().equals(oldLdapGroup.getDescription())){
+            modsList.add(createAttributeModification("description", newLdapGroup.getDescription()));
+        }
+
+        if( !newLdapGroup.getOwner().equals(oldLdapGroup.getOwner())){
+            modsList.add(createAttributeModification("owner", newLdapGroup.getOwner()));
+        }
+
+        return modsList.toArray(new AttributeModification[modsList.size()]);
+    }
+
+    private AttributeModification[] createUserModificationsArray(LdapUser newLdapUser, LdapUser oldLdapUser){
 
         List<AttributeModification> modsList = new ArrayList<>();
 

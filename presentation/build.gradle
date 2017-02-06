@@ -15,6 +15,7 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-security:1.4.2.RELEASE')
     compile("org.springframework:spring-tx:4.2.0.RELEASE")
     compile("org.springframework.security:spring-security-ldap:4.2.0.RELEASE")
+    compile group: 'javax.validation', name: 'validation-api', version: '1.1.0.Final'
     compile group: 'com.google.code.gson', name: 'gson', version: '1.7.2'
     compile("org.apache.directory.server:apacheds-server-jndi:1.5.5")
     compile project(':bll')

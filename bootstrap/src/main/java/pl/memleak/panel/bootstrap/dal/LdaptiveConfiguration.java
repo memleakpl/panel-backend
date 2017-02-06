@@ -61,6 +61,7 @@ public class LdaptiveConfiguration {
             environment.getProperty("ldap.query.getGroup"),
             environment.getProperty("ldap.query.getAllUsers"),
             environment.getProperty("ldap.query.getAllGroups"),
+            environment.getProperty("ldap.query.getUserGroups"),
             environment.getProperty("ldap.baseDn.user.default"),
             environment.getProperty("ldap.baseDn.group.default")
         );
